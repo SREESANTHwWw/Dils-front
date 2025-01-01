@@ -50,7 +50,7 @@ const LoginComponent = () => {
         localStorage.setItem("currentUser", JSON.stringify(res.data.user));
         toast.success("login successFull");
         cartdata();
-       
+     
 
       })
       .catch((err) => {

@@ -57,7 +57,7 @@ const CartComponent = () => {
       setSubtotal(res.data.cart.subtotal);
    
     });
-  }, [userId]);
+  }, []);
 
   return (
     <div className="flex flex-col items-center bg-gray-100 min-h-screen mt-[8rem]">
