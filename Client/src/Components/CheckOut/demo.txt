@@ -1,0 +1,308 @@
+import axios from "axios";
+import React, { useContext, useEffect, useState } from "react";
+import { HiOutlineShoppingCart } from "react-icons/hi";
+import { Link, useNavigate } from "react-router-dom";
+import { server } from "../../Server";
+import { ProductsContext } from "../Context/ProductsContext";
+import { toast } from "react-toastify";
+
+
+const CheckOutComponent = () => {
+  const [address, setAddress] = useState([]);
+  const [subtotal, setSubtotal] = useState(0);
+  const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
+  const { formatPrice } = useContext(ProductsContext);
+  const [addAddress, setAddAddress] = useState(false);
+  const navigate = useNavigate();
+  const[fullname,setFullname]= useState("")
+  const[Pincode,setPincode]= useState("")
+  const[city,setcity]= useState("")
+  const[phonenumber,setphonenumber]= useState("")
+  const[landmark,setlandmark]= useState("")
+  const[state,setstate]= useState("")
+  const localdata = localStorage.getItem("user_id");
+  const userId = localdata ? JSON.parse(localdata) : null;
+
+  // Fetch cart details
+  useEffect(() => {
+    if (!userId) return;
+
+    setLoading(true);
+    axios
+      .get(${server}/getAll-cart/${userId})
+      .then((res) => {
+        setCart(res.data.cart.items);
+        setSubtotal(res.data.cart.subtotal);
+      })
+      .catch((error) => console.error("Error fetching cart data:", error))
+      .finally(() => setLoading(false));
+  }, [userId]);
+
+  // Order placement function
+  const ordering = () => {
+    if (!address.trim()) {
+      alert("Please enter your shipping address.");
+      return;
+    }
+
+    const orderDetails = cart.map((item) => ({
+      productname: item.productname,
+      price: item.price,
+      minimum_order_quantity: item.minimum_order_quantity,
+      address,
+    }));
+
+    setLoading(true);
+    axios
+      .post(${server}/create-order, {
+        userId,
+        orderDetails,
+        address,
+        subtotal,
+        paymentMethod,
+      })
+      .then((res) => {
+        console.log("Order Created:", res.data);
+        alert("Order successfully placed!");
+        navigate("/");
+      })
+      .catch((error) => {
+        console.error("Order creation failed:", error);
+        alert("Failed to place order. Please try again later.");
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const handleaddress =()=>{
+    axios.post(${server}/add-address,{
+      userId,
+      fullname,
+      Pincode,
+      city,
+      phonenumber,
+      landmark,
+      state
+
+    }).then((res)=>{
+     toast.success("Address added")
+      setAddAddress(false)
+      setFullname("")
+      setphonenumber("")
+      setcity("")
+      setPincode("")
+      setlandmark("")
+      setstate("")
+    }).catch((err)=>{
+      toast.error("invalid credentials")
+    })
+  }
+
+  const fetchAddress =()=>{
+    axios.get(${server}/getAddress/${userId}).then((res)=>{
+      setAddress(res.data)
+    })
+
+  }
+  useEffect(()=>{fetchAddress()},[userId])
+
+
+  return (
+    <div className="flex flex-col min-h-screen items-center bg-gray-100">
+      {/* Header */}
+      <div className="flex justify-between items-center w-[95%] bg-blue-950 h-[80px] px-6 rounded-b-lg shadow-md">
+        <span className="text-white text-xl font-semibold">Dils Trades</span>
+        <span className="text-white text-lg font-medium">Checkout</span>
+        <div className="flex flex-col items-center gap-1">
+          <Link to="/cart">
+            <HiOutlineShoppingCart className="text-3xl text-white hover:text-yellow-500 transition duration-300" />
+          </Link>
+          <span className="text-xs font-semibold text-white hover:text-yellow-500">
+            Cart
+          </span>
+        </div>
+      </div>
+
+      {/* Loading Indicator */}
+      {loading && <div className="text-blue-600 mt-4">Loading...</div>}
+
+      {/* Address Section */}
+
+      {Array.isArray(address) &&  address.length > 0(
+        <div>
+        {address.map((e)=>(
+          <div>
+          <span>{e.fullname}</span>
+              <span>{e.phonenumber}</span>
+              <span>{e.landmark}</span>
+              <span>{e.pincode}</span>
+              <span>{e.state}</span>
+          </div>
+        
+      
+         
+            
+          ))}
+        </div>):(
+        <div className="w-[75%] mt-8 bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">Shipping Address</h2>
+        <button
+          onClick={() => setAddAddress(true)}
+          className="text-blue-600 hover:underline"
+        >
+          Add Address
+        </button>
+      </div>
+        )}
+      
+     
+
+      {/* Address Modal */}
+      {addAddress && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-xl w-[90%] max-w-2xl">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Add Address</h2>
+
+            {/* Form Fields */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="block text-gray-700 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  placeholder="John Doe"
+                  value={fullname}
+                  className="w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e)=>setFullname(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-1">Phone Number</label>
+                <input
+                  type="text"
+                  placeholder="1234567890"
+                  value={phonenumber}
+                  className="w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e)=>setphonenumber(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-1">Pincode</label>
+                <input
+                  type="text"
+                  value={Pincode}
+                  placeholder="123456"
+                  className="w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e)=>setPincode(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-1">Landmark</label>
+                <input
+                  type="text"
+                  value={landmark}
+                  placeholder="Near park or mall"
+                  className="w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e)=>setlandmark(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-1">City</label>
+                <input
+                  type="text"
+                  value={city}
+                  placeholder="City"
+                  className="w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e)=>setcity(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-700 mb-1">State</label>
+                <select
+                  className="w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e)=>setstate(e.target.value)}
+                  value={state}
+                >
+                  <option value="" disabled>
+                    Choose a state
+                  </option>
+                  <option value="kerala">Kerala</option>
+                  <option value="tamilnadu">Tamil Nadu</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex justify-end mt-6 gap-4">
+              <button
+                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition"
+                onClick={() => setAddAddress(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+                onClick={handleaddress}
+              >
+                Save Address
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Method */}
+      <div className="w-[75%] mt-6 bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">Payment Method</h2>
+        <p className="text-gray-600 mb-4">Subtotal: {formatPrice(subtotal)}</p>
+        <div className="flex flex-col gap-2">
+          <label>
+            <input
+              type="radio"
+              name="payment"
+              value="Credit / Debit Card"
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            />
+            Credit / Debit Card
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="payment"
+              value="PayPal"
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            />
+            PayPal
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="payment"
+              value="Cash on Delivery"
+              defaultChecked
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            />
+            Cash on Delivery
+          </label>
+        </div>
+      </div>
+
+      {/* Place Order Button */}
+      <div className="w-[75%] mt-8 mb-4 flex justify-end">
+        <button
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md"
+          onClick={ordering}
+        >
+          Place Order
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default CheckOutComponent;

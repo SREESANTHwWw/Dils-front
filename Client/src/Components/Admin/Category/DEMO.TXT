@@ -1,0 +1,15 @@
+    Promise.all([
+      axios.get(`${server}/get-category/${id}`),
+      axios.get(`${server}/get-products/${id}`),
+    ])
+      .then(([categoryres, productres]) => {
+        const subcategories = categoryres.data.getsub_category;
+        if (subcategories && subcategories.length > 0) {
+          setCurrentData(subcategories);
+        }
+        const categoryproduct = productres.data.GetcategoryProuduct;
+        if (categoryproduct && categoryproduct.length > 0) {
+          setProductModal(true);
+          setCurrentData(productres.data.GetcategoryProuduct);
+        }
+      });

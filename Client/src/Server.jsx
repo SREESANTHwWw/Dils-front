@@ -1,0 +1,1 @@
+export const server = 'https://dils-back.onrender.com/api/v1'
