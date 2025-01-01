@@ -3,7 +3,6 @@ import {  Navigate, useNavigate } from "react-router-dom";
 import { AuthContext } from "./Context/AuthContext";
 
 const ProtectedRoute = ({ children,allowedTypes }) => {
-  
 
   const { currentUser} = useContext(AuthContext);
   
@@ -16,7 +15,6 @@ const ProtectedRoute = ({ children,allowedTypes }) => {
 
   return children;
 };
-  
 
 
 export default ProtectedRoute;
