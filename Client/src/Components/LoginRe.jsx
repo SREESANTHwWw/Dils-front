@@ -5,15 +5,24 @@ import Login from "../Pages/Login";
 
 const LoginRe = () => {
   const { currentUser } = useContext(AuthContext);
-  console.log(currentUser);
+
+  // If no user is logged in, show the login page
   if (!currentUser) {
     return <Login />;
   }
-  if (currentUser.type === "admin") return <Navigate to="/admin" replace />;
-  if (currentUser.type === "user") return <Navigate to="/" replace />;
-  if (currentUser.type === "medium") return <Navigate to="/" replace />;
-  if (currentUser.type === "premium") return <Navigate to="/" replace />;
- 
+
+  // Navigate based on user type
+  switch (currentUser?.type) {
+    case "admin":
+      return <Navigate to="/admin" replace />;
+    case "user":
+    case "medium":
+    case "premium":
+      return <Navigate to="/" replace />;
+    default:
+      // Fallback for unknown user types
+      return <Navigate to="/login" replace />;
+  }
 };
 
 export default LoginRe;
