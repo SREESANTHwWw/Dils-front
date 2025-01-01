@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ProductsContext } from '../Context/ProductsContext';
 import Navbar from '../../Pages/Navbar';
-import '../../app.css';
+
 import { AuthContext } from '../Context/AuthContext';
 import axios from 'axios';
 import { server } from '../../Server';
