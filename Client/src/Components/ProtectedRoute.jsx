@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children,allowedTypes }) => {
     return <Navigate to="/login" replace />;
   }
   if (allowedTypes && !allowedTypes.includes(currentUser.type)) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;
