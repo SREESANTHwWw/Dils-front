@@ -5,7 +5,7 @@ import Login from "../Pages/Login";
 
 const LoginRe = () => {
   const { currentUser } = useContext(AuthContext);
-  console.log(currentUser);
+ 
   if (!currentUser) {
     return <Login />;
   }
