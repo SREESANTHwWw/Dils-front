@@ -45,9 +45,9 @@ const LoginComponent = () => {
         password: pass,
       })
       .then((res) => {
-        localStorage.setItem("user_id", JSON.stringify(res.data.user.id));
+        sessionStorage.setItem("user_id", JSON.stringify(res.data.user.id));
         setCurrentUser(res.data.user);
-        localStorage.setItem("currentUser", JSON.stringify(res.data.user));
+        sessionStorage.setItem("currentUser", JSON.stringify(res.data.user));
         toast.success("login successFull");
         cartdata();
         window.location.reload()
