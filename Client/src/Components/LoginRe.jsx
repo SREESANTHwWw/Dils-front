@@ -5,6 +5,7 @@ import Login from "../Pages/Login";
 
 const LoginRe = () => {
   const { currentUser } = useContext(AuthContext);
+  console.log(currentUser);
   if (!currentUser) {
     return <Login />;
   }
@@ -12,7 +13,7 @@ const LoginRe = () => {
   if (currentUser.type === "user") return <Navigate to="/" replace />;
   if (currentUser.type === "medium") return <Navigate to="/" replace />;
   if (currentUser.type === "premium") return <Navigate to="/" replace />;
-  return <Login />;
+ 
 };
 
 export default LoginRe;
