@@ -1,1 +1,1 @@
-export const server = 'https://dils-back.onrender.com/api/v1'
+export const server = 'https://dils-backend.onrender.com/api/v1'
