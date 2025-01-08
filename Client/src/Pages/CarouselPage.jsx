@@ -5,11 +5,11 @@ import rewind from '../assets/rewind.jpg';
 const CarouselPage = () => {
   const slides = [
     {
-      imgSrc: brushcutter,
+      imgSrc: "https://res.cloudinary.com/dkz8fh4jt/image/upload/c_fill,g_auto,h_250,w_970/b_rgb:000000,e_gradient_fade,y_-0.50/c_scale,co_rgb:ffffff,fl_relative,l_text:montserrat_25_style_light_align_center:Shop%20Now,w_0.5,y_0.18/v1736373530/drde5c8uvnsftbtji5zw.jpg",
       imgAlt: '',
     },
     {
-      imgSrc: rewind,
+      imgSrc: "https://res.cloudinary.com/dkz8fh4jt/image/upload/v1736373530/drde5c8uvnsftbtji5zw.jpg",
       imgAlt: 'rewind',
     },
     {
