@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useContext, useEffect, useState } from 'react';
 import { server } from '../../../Server';
 import { ProductsContext } from '../../Context/ProductsContext';
+import moment from 'moment';
 
 const Orders = () => {
   const [allOrders, setAllOrders] = useState([]);
@@ -9,6 +10,8 @@ const Orders = () => {
   const { formatPrice } = useContext(ProductsContext);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [filter, setFilter] = useState("");
+  const [finishFilter, setFinish] = useState([]);
 
   // Fetch all orders
   const fetchAllOrders = () => {
@@ -17,6 +20,7 @@ const Orders = () => {
       .then((res) => {
         setAllOrders(res.data.getorders); // Assuming 'getorders' is an array
         setTotalPages(res.data.totalPages);
+       
       })
       .catch((error) => {
         console.error('Error fetching orders:', error);
@@ -25,7 +29,43 @@ const Orders = () => {
 
   useEffect(() => {
     fetchAllOrders();
-  }, [currentPage]);
+  }, [currentPage,]);
+useEffect(()=>{
+  setFinish(allOrders)
+},[allOrders])
+  
+  // Format date using moment.js
+  const formatDate = (date) => {
+    if (!date) return ""; // Return empty if date is not provided
+
+    const formattedDate = moment(date);
+
+    if (!formattedDate.isValid()) {
+      console.error("Invalid date:", date);
+      return "";
+    }
+
+    return formattedDate.format("YYYY-MM-DD");
+  };
+
+  // Filter orders by the formatted date
+  const formatingSearchData = formatDate(filter);
+
+ const handleSubmit = ()=>{
+  if (!filter) {
+    setFinish(allOrders); // If no filter, show all orders
+  } else {
+    const filterOrders = allOrders.filter((res) => {
+      const formattedOrderDate = formatDate(res.orderDate);
+      // Perform a proper date comparison, not an includes check
+      return formattedOrderDate === formatingSearchData;
+    });
+    setFinish(filterOrders); // Set filtered orders
+  }
+
+ }
+
+ 
 
   // Update Order Status
   const handleUpdateStatus = (orderId) => {
@@ -39,17 +79,17 @@ const Orders = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'Pending':
-        return 'text-yellow-500'; // Yellow for Pending
+        return 'text-yellow-500';
       case 'Order Confirmed':
-        return 'text-green-500'; // Green for Order Confirmed
+        return 'text-green-500';
       case 'Shipped':
-        return 'text-blue-500'; // Blue for Shipped
+        return 'text-blue-500';
       case 'Delivered':
-        return 'text-gray-500'; // Gray for Delivered
+        return 'text-gray-500';
       case 'Canceled':
-        return 'text-red-500'; // Red for Canceled
+        return 'text-red-500';
       default:
-        return 'text-black'; // Default color
+        return 'text-black';
     }
   };
 
@@ -73,8 +113,42 @@ const Orders = () => {
 
   return (
     <div className="p-6 bg-gray-50">
-      <h2 className="text-3xl font-bold mb-6 text-gray-800">All Orders</h2>
-      {allOrders.length > 0 ? (
+      <div className='flex justify-between'>
+        <h2 className="text-3xl font-bold mb-6 text-gray-800">All Orders</h2>
+
+        <div className="flex items-center gap-2 mb-6">
+  <input
+    type="search"
+    placeholder="Search by date (YYYY-MM-DD)..."
+    value={filter}
+    onChange={(e) => {
+      setFilter(e.target.value);
+      if (e.target.value === "") {
+        setFinish(allOrders); // Reset to all orders if input is cleared
+      }
+    }}
+    className="px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none [&::-webkit-search-cancel-button]:appearance-none"
+  />
+  <button
+    onClick={handleSubmit}
+    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+  >
+    Search
+  </button>
+  <button
+    onClick={() => {
+      setFilter(""); // Clear input field
+      setFinish(allOrders); // Reset to all orders
+    }}
+    className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 focus:ring-2 focus:ring-gray-500 focus:outline-none"
+  >
+    Clear
+  </button>
+</div>
+
+      </div>
+
+      {allOrders &&  finishFilter.length > 0 ? (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-300">
             <thead>
@@ -88,7 +162,7 @@ const Orders = () => {
               </tr>
             </thead>
             <tbody>
-              {allOrders.map((order) => (
+              {allOrders && finishFilter.map((order) => (
                 <tr key={order._id} className="border-b">
                   <td className="py-3 px-4 text-sm text-gray-800">{order._id}</td>
                   <td className="py-3 px-4 text-sm text-gray-600">
@@ -104,7 +178,6 @@ const Orders = () => {
                   <td className="py-3 px-4 text-sm text-gray-800">{new Date(order.orderDate).toLocaleDateString()}</td>
                   <td className="py-3 px-4 text-sm">
                     <div className="flex gap-2 items-center">
-                      {/* Update status dropdown */}
                       <select
                         value={status}
                         onChange={(e) => setStatus(e.target.value)}

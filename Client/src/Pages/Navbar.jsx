@@ -48,6 +48,7 @@ const Navbar = () => {
           {/* Left Section */}
           <div className="flex items-center gap-4 w-full justify-between sm:w-[50%]">
             <img className="h-10" src="" alt="Logo" />
+            
 
             {/* Search Bar */}
             <div className="relative w-[400px] right-6">
@@ -141,4 +142,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Navbar;  

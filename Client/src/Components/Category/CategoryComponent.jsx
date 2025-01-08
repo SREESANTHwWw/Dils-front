@@ -12,10 +12,6 @@ const filterCategory =()=>{
   
 }
  
-
-
-
-
   return (
     <div className="xl:w-[80%] sm:w-[70%] w-[95%] xl:h-auto sm:h-[100px] h-auto my-16 mt-[10rem] mx-auto">
 

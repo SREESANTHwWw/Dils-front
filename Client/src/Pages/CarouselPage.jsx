@@ -7,7 +7,7 @@ const CarouselPage = () => {
       imgAlt: '',
     },
     {
-      imgSrc: 'https://penguinui.s3.amazonaws.com/component-assets/carousel/default-slide-2.webp',
+      imgSrc: '../../public/brushcutter.png',
       imgAlt: 'Vibrant abstract painting with swirling red, yellow, and pink hues on a canvas.',
     },
     {
@@ -31,7 +31,7 @@ const CarouselPage = () => {
   };
 
   return (
-    <div className="relative w-full overflow-hidden ">
+    <div className="relative w-full overflow-hidden mt-40 ">
       <button
         type="button"
         className="absolute left-5 top-1/2 z-20 flex rounded-full -translate-y-1/2 items-center justify-center bg-white/40 p-2 text-neutral-600 transition hover:bg-white/60 dark:bg-neutral-950/40 dark:text-neutral-300"

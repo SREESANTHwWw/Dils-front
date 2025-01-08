@@ -1,110 +1,95 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ProductsContext } from '../Context/ProductsContext';
-import Navbar from '../../Pages/Navbar';
+import React, { useContext, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ProductsContext } from "../Context/ProductsContext";
+import Navbar from "../../Pages/Navbar";
 
-import { AuthContext } from '../Context/AuthContext';
-import axios from 'axios';
-import { server } from '../../Server';
+import { AuthContext } from "../Context/AuthContext";
+import axios from "axios";
+import { server } from "../../Server";
 
 const ProductsComponent = () => {
-  const {  Addtocartfun, formatPrice , 
-     
-   } = useContext(ProductsContext);
-    const { currentUser } = useContext(AuthContext);
-    const [searchData, setSearchData] = useState("");
-      const [filterData, setFilterData] = useState([]);
-      const [currentPage, setCurrentPage] = useState(1); // Track the current page
-      const [totalPages, setTotalPages] = useState(1);
-      const [product, setProducts] = useState([]);
-      const perpage = 4;
-    const renderPrice = (product) => {
-      if (!currentUser) return null; // Don't show prices if no user is logged in
-  
-      const priceTypes = {
-        user: product.price,
-        medium: product.medium_price,
-        premium: product.premium_price,
-      };
-  
-      const userType = currentUser.type;
-      const price = priceTypes[userType];
-      console.log(userType)
+  const { Addtocartfun, formatPrice,searchData } = useContext(ProductsContext);
+  const { currentUser } = useContext(AuthContext);
+ 
+  const [filterData, setFilterData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1); // Track the current page
+  const [totalPages, setTotalPages] = useState(1);
+  const [product, setProducts] = useState([]);
+  const perpage = 4;
+  const renderPrice = (product) => {
+    if (!currentUser) return null; // Don't show prices if no user is logged in
 
+    const priceTypes = {
+      user: product.price,
+      medium: product.medium_price,
+      premium: product.premium_price,
+    };
 
+    const userType = currentUser.type;
+    const price = priceTypes[userType];
+    console.log(userType);
 
-      
-    
-    
-    
-      
-  
-      return (
-        <div className="flex justify-between items-center">
-          <p className="text-sm font-medium text-gray-500 line-through">
-            MRP: {formatPrice(product.mRP)}
-          </p>
-          <p className="text-xl font-bold text-green-600">
-            {formatPrice(price)}
-          </p>
-        </div>
+    return (
+      <div className="flex justify-between items-center">
+        <p className="text-sm font-medium text-gray-500 line-through">
+          MRP: {formatPrice(product.mRP)}
+        </p>
+        <p className="text-xl font-bold text-green-600">{formatPrice(price)}</p>
+      </div>
+    );
+  };
+
+  const FetchProduct = () => {
+    const offset = (currentPage - 1) * perpage;
+
+    axios
+      .get(`${server}/get-all-products?page=${currentPage}`)
+      .then((res) => {
+        console.log(res.data);
+        setProducts(res.data.results);
+        setTotalPages(res.data.totalPages); // Set products data
+      })
+      .catch((err) => {
+        console.error(err);
+        toast.error("Failed to fetch products"); // Show error toast
+      });
+  };
+  useEffect(() => {
+    FetchProduct();
+  }, [currentPage, perpage]);
+
+  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+  useEffect(() => {
+    if (!searchData) {
+      setFilterData(product);
+    } else {
+      const filteredSearchData = product.filter((res) =>
+        res.productname.toLowerCase().includes(searchData)
       );
-      
-    };
+      setFilterData(filteredSearchData);
+    }
+  }, [searchData, product]);
 
-    const FetchProduct = () => {
-      const offset = (currentPage - 1) * perpage;
-  
-      axios
-        .get(`${server}/get-all-products?page=${currentPage}`)
-        .then((res) => {
-          console.log(res.data);
-          setProducts(res.data.results)
-          setTotalPages(res.data.totalPages); // Set products data
-         
-        })
-        .catch((err) => {
-          console.error(err);
-          toast.error("Failed to fetch products"); // Show error toast
-        });
-    };
-    useEffect(() => {
-        FetchProduct();
-      }, [currentPage, perpage]);
-    
-      const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
-    
-      useEffect(() => {
-        if (!searchData) {
-          setFilterData(product);
-        } else {
-          const filteredSearchData = product.filter((res) =>
-            res.productname.toLowerCase().includes(searchData)
-          );
-          setFilterData(filteredSearchData);
-        }
-      }, [searchData, product]);
-    
-      const searchfunction = (e) => {
-        setSearchData(e.target.value.toLowerCase());
-      };
+  const searchfunction = (e) => {
+    setSearchData(e.target.value.toLowerCase());
+  };
 
+  const handlePrev = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
 
-    const handlePrev = () => {
-      if (currentPage > 1) {
-        setCurrentPage(currentPage - 1);
-      }
-    };
-  
-    const handleNext = () => {
-      if (currentPage < totalPages) {
-        setCurrentPage(currentPage + 1);
-      }
-    };
-  
-    const handlePageClick = (page) => {
-      setCurrentPage(page);
-    };
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePageClick = (page) => {
+    setCurrentPage(page);
+  };
 
   return (
     <div className="w-full flex justify-center items-center flex-col mt-[7rem]">
@@ -158,30 +143,32 @@ const ProductsComponent = () => {
         ))}
       </div>
       <div className="flex mt-6 space-x-2">
+        <button
+          onClick={handlePrev}
+          disabled={currentPage === 1}
+          className="px-4 py-2 border rounded-md hover:bg-gray-200 disabled:opacity-50"
+        >
+          Previous
+        </button>
+        {pageNumbers.map((page) => (
           <button
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-            className="px-4 py-2 border rounded-md hover:bg-gray-200 disabled:opacity-50"
+            key={page}
+            onClick={() => handlePageClick(page)}
+            className={`px-4 py-2 border rounded-md hover:bg-gray-200 ${
+              currentPage === page ? "bg-blue-900 text-white" : "bg-white"
+            }`}
           >
-            Previous
+            {page}
           </button>
-          {pageNumbers.map((page) => (
-            <button
-              key={page}
-              onClick={() => handlePageClick(page)}
-              className={`px-4 py-2 border rounded-md hover:bg-gray-200 ${currentPage === page ? 'bg-blue-900 text-white' : 'bg-white'}`}
-            >
-              {page}
-            </button>
-          ))}
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 border rounded-md hover:bg-gray-200 disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+        ))}
+        <button
+          onClick={handleNext}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 border rounded-md hover:bg-gray-200 disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };

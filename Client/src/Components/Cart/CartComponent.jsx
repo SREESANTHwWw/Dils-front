@@ -16,7 +16,7 @@ const CartComponent = () => {
   const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
 
-  const userType = currentUser?.userType || "user"; // Default to 'user' type
+  const userType = currentUser?.userType || "User"; // Default to 'user' type
 
   const updateQuantity = async (productId, action) => {
     try {
@@ -120,9 +120,9 @@ const CartComponent = () => {
                 <div className="absolute flex flex-col items-center justify-center top-2 right-4">
                   <span className="text-xl font-semibold text-black-600">
                     Price:{" "}
-                    {userType === "medium"
+                    {userType === "Medium"
                       ? formatPrice(item.medium_price)
-                      : userType === "premium"
+                      : userType === "Premium"
                       ? formatPrice(item.premium_price)
                       : formatPrice(item.price)}
                   </span>

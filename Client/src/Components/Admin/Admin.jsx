@@ -10,6 +10,7 @@ import Sidebar from "./Sidebar";
 import { UserCircleIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
 import SubCate from "./Category/SubCate";
 import SubCateProduct from "./Category/SubCateProduct";
+import Unit from "./Unit/Unit";
 
 const Admin = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -80,7 +81,7 @@ const Admin = () => {
             <Route path="category" element={<Category />} />
             <Route path="orders" element={<Orders />} />
             <Route path="users" element={<AllUsers />} />
-            {/* <Route path="addProduct" element={<AddProduct />} /> */}
+            <Route path="unit" element={<Unit />} />
             <Route path="editProducts" element={<EditProducts />} />
              <Route path="subcategory/:id" element={<SubCate />} />
              <Route path="viewproduct/:id"element={<SubCateProduct/>}/>

@@ -156,7 +156,8 @@ const ProductsContextProvider = (props) => {
         setCurrentPage,
         currentPage,
         pageNumbers,
-        totalPages
+        totalPages,
+        setFilterData
         
       }}
     >

@@ -37,11 +37,12 @@ const App = () => {
               <BrowserRouter>
                 <Routes>
                 <Route path="/login" element={<LoginRe />} />
+                <Route path="/signup" element={<SignUp />} />
                   {/* Public Routes */}
                   <Route path="/" element={<Navbar />}>
                     <Route index element={<Home />} />
                    
-                    <Route path="/signup" element={<SignUp />} />
+                   
                     <Route path="/products" element={<Products />} />
                     <Route path="/viewproduct/:id" element={<ViewProduct />} />
                   </Route>

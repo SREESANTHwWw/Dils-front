@@ -23,7 +23,7 @@ const Sidebar = () => {
     { icon: <Settings size={20} />, label: 'Category Settings', section: 'category' },
     { icon: <ShoppingCart size={20} />, label: 'Orders', section: 'orders' },
     { icon: <Users size={20} />, label: 'Users', section: 'users' },
-    // { icon: <Package size={20} />, label: 'Add Product', section: 'addProduct' },
+    { icon: <Package size={20} />, label: 'Unit', section: 'unit' },
     { icon: <PackageX size={20} />, label: 'Edit Products', section: 'editProducts' },
     { icon: <LogOut size={20} />, label: 'Logout', section: 'logout' },
   ];
@@ -31,7 +31,7 @@ const Sidebar = () => {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <div className={`h-screen shadow-md bg-white transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
+      <div className={`h-screen  bg-white transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
         {/* Header */}
         <div className="p-5 border-b flex items-center gap-4">
          

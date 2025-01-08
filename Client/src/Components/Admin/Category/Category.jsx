@@ -17,6 +17,11 @@ const Category = () => {
   const [hasSubcategory, setHasSubcategory] = useState(false);
   const [currentCategoryId, setCurrentCategoryId] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [openEditmodal, setEditOpenmodal] = useState(false);
+  const [editCategoryName, setEditCategoryName] = useState("");
+const [editCategoryImg, setEditCategoryImg] = useState(null);
+const [editHasSubcategory, setEditHasSubcategory] = useState(false);
+const [editCategoryId, setEditCategoryId] = useState(null);
  
   const navigate = useNavigate();
   //productstates
@@ -82,6 +87,7 @@ const Category = () => {
       });
   };
 
+ 
   // Delete Category
   const dltCate = (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
@@ -115,7 +121,71 @@ const Category = () => {
 //   setEditOpen(true);
 //   setUpdateCate(category);
 // }; 
+
+const openEdit = (item) => {
+  setCategoryName(item.Category_name);
+  setCategoryImg(item.Category_img); // Keep the existing image initially
+  setHasSubcategory(item.hasSubcategory);
+  setEditCategoryId(item._id);
+  setEditOpenmodal(true);
+};
   
+const closeEditModal = () => {
+  setEditOpenmodal(false);
+  
+};
+console.log(editCategoryId)
+
+const updateCategory = (e) => {
+  e.preventDefault();
+
+  const config = {
+    headers: { "Content-Type": "multipart/form-data" },
+  };
+
+  const updatedCategory = new FormData();
+  updatedCategory.append("Category_name", categoryName);
+
+  // Update only if a new image is uploaded
+  if (categoryImg) {
+    updatedCategory.append("Category_img", categoryImg);
+  }
+
+  updatedCategory.append("hasSubcategory", hasSubcategory);
+
+  // Send the patch request to update the category
+  axios.patch(`${server}/edit-category/${editCategoryId}`, updatedCategory, config)
+    .then((res) => {
+      if (res.data.msg === "success") {
+        const editedCategory = res.data.updatedCategory; // Assuming the response returns the updated category
+
+        // Update the state by replacing the old category with the edited one
+        setCurrentData((prevData) => {
+          return prevData.map((category) => {
+            if (category._id === editedCategory._id) {
+              return { ...category, ...editedCategory }; // Replace the category with updated data
+            }
+            return category; // Keep other categories as they are
+          });
+        });
+
+        // Show success message and reset state
+        toast.success("Category Edited successfully", { theme: "colored" });
+        setCategoryName("");
+        setCategoryImg(null);
+        setHasSubcategory(false);
+        setEditOpenmodal(false); // Close the edit modal
+      } else {
+        toast.error("Error editing category", { theme: "colored" });
+      }
+    })
+    .catch((error) => {
+      console.error("Error updating category:", error);
+      toast.error("Something went wrong", { theme: "colored" });
+    });
+};
+
+
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
@@ -173,7 +243,7 @@ const Category = () => {
                       </button>
                       <button
                         className="px-3 py-1 text-white bg-yellow-500 rounded hover:bg-yellow-600 transition-colors flex items-center gap-1"
-                        // onClick={openEdit}
+                        onClick={()=>openEdit(item)}
                       >
                         <Pencil size={16} />
                         <span className="hidden sm:inline">Edit</span>
@@ -239,6 +309,16 @@ const Category = () => {
                       onChange={(e) => setCategoryImg(e.target.files[0])}
                       className="w-full"
                     />
+                      {categoryImg && categoryImg instanceof File ? (
+  <img
+    src={URL.createObjectURL(categoryImg)}
+    alt="Preview"
+    className="mt-2 w-32 h-32 object-cover"
+  />
+) : (
+  editCategoryImg && <img src={editCategoryImg} alt="Existing" className="mt-2 w-32 h-32 object-cover" />
+)}
+                    
                   </div>
                   <div className="mb-4 flex items-center">
                     <input
@@ -273,7 +353,72 @@ const Category = () => {
           </div>
         </div>
       )}
-     
+    {openEditmodal && (
+  <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/50">
+    <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
+      <h2 className="text-lg font-semibold mb-4">Edit Category</h2>
+      <form onSubmit={updateCategory}>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Category Name:</label>
+          <input
+            type="text"
+            value={categoryName}
+            onChange={(e) => setCategoryName(e.target.value)}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:border-blue-500"
+          />
+        </div>
+
+        <div className="mb-4">
+  <label className="block text-sm font-medium mb-2">Category Image:</label>
+  <input
+    type="file"
+    accept=".jpg, .jpeg, .png"
+    onChange={(e) => setCategoryImg(e.target.files[0])}
+    className="w-full"
+  />
+  {categoryImg && categoryImg instanceof File ? (
+  <img
+    src={URL.createObjectURL(categoryImg)}
+    alt="Preview"
+    className="mt-2 w-32 h-32 object-cover"
+  />
+) : (
+  editCategoryImg && <img src={editCategoryImg} alt="Existing" className="mt-2 w-32 h-32 object-cover" />
+)}
+
+</div>
+
+
+        <div className="mb-4 flex items-center">
+          <input
+            type="checkbox"
+            checked={hasSubcategory}
+            onChange={(e) => setHasSubcategory(e.target.checked)}
+            className="mr-2"
+          />
+          <label className="text-sm font-medium">Has Subcategory?</label>
+        </div>
+
+        <div className="flex justify-end gap-4">
+          <button
+            type="button"
+            onClick={closeEditModal}
+            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+          >
+            Update
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
