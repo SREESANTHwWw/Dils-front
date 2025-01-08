@@ -133,10 +133,10 @@ const LoginComponent = () => {
           </form>
           {
             loading&&(
-              <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+              <div className="fixed inset-0 z-50 flex justify-center items-center backdrop-blur-sm">
+          
           <img class="w-20 h-20 animate-spin" src="https://www.svgrepo.com/show/199956/loading-loader.svg" alt="Loading icon"/>
-            </div>
+         
           </div>
             )
           }
