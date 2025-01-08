@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { server } from '../../../Server';
 import { ProductsContext } from '../../Context/ProductsContext';
 import moment from 'moment';
+import { toast } from 'react-toastify';
 
 const Orders = () => {
   const [allOrders, setAllOrders] = useState([]);
@@ -74,7 +75,10 @@ useEffect(()=>{
       status,
     }).then((res) => {
       fetchAllOrders();
-    });
+      setLoading(false)
+    }).catch((err)=>{
+      toast.error("Order Loading Error")
+    }).finally(()=>setLoading(false))
   };
 
   const getStatusColor = (status) => {
