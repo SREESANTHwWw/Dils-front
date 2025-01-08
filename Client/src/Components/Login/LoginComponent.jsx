@@ -39,7 +39,7 @@ const LoginComponent = () => {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
-   
+    setLoading(true);
     axios
       .post(`${server}/login-user`, {
         username: name,
