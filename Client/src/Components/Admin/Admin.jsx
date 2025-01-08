@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import AddProduct from "./AddProducts/AddProducts";
-import EditProducts from "./AddProducts/EditProducts";
 
+import EditProducts from "./AddProducts/EditProducts";
 import AllUsers from "./Users/AllUsers";
 import Category from "./Category/Category";
 import Orders from "./Allorders/Orders";
