@@ -85,7 +85,7 @@ const ProductsContextProvider = (props) => {
     const description = product.description;
     const mRP = product.mRP;
 
- setLoading(true)
+
  
     axios
       .post(`${server}/addToCart`, {
