@@ -75,7 +75,7 @@ const CheckOutComponent = () => {
       address: selectedAddress, // Use selected address
     }));
 
-    console.log(selectedAddress);
+    
     setLoading(true);
     axios
       .post(`${server}/create-order`, {

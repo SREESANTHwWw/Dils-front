@@ -15,6 +15,7 @@ import { ProductsContext } from "../Context/ProductsContext";
 const LoginComponent = () => {
   const { currentUser, setCurrentUser } = useContext(AuthContext);
   const { cartdata } = useContext(ProductsContext);
+  const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
   const {
@@ -38,7 +39,7 @@ const LoginComponent = () => {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
-
+    setLoading(true);
     axios
       .post(`${server}/login-user`, {
         username: name,
@@ -55,7 +56,7 @@ const LoginComponent = () => {
       })
       .catch((err) => {
         toast.error("invalid credentials");
-      });
+      }).finally(() => setLoading(false));
   };
 
   return (
@@ -130,6 +131,15 @@ const LoginComponent = () => {
               </span>
             </div>
           </form>
+          {
+            loading&&(
+              <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+          <img class="w-20 h-20 animate-spin" src="https://www.svgrepo.com/show/199956/loading-loader.svg" alt="Loading icon"/>
+            </div>
+          </div>
+            )
+          }
         </div>
       </div>
     </div>
