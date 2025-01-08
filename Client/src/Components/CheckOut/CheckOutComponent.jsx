@@ -6,6 +6,7 @@ import { server } from "../../Server";
 import { ProductsContext } from "../Context/ProductsContext";
 import { toast } from "react-toastify";
 import { useLocation } from "react-router-dom";
+import theme from "@material-tailwind/react/theme";
 const CheckOutComponent = () => {
   const [address, setAddress] = useState([]);
   const location = useLocation();
@@ -63,7 +64,7 @@ const CheckOutComponent = () => {
   // Order placement function
   const ordering = () => {
     if (!selectedAddress) {
-      alert("Please select a shipping address.");
+      toast.warning("Please select a shipping address.",{theme:"colored"});
       return;
     }
 
@@ -86,12 +87,12 @@ const CheckOutComponent = () => {
       })
       .then((res) => {
         console.log("Order Created:", res.data);
-        alert("Order successfully placed!");
+        toast.success("Order successfully placed!",{theme:"colored"});
         navigate("/");
       })
       .catch((error) => {
         console.error("Order creation failed:", error);
-        alert("Failed to place order. Please try again later.");
+        toast.error("Failed to place order. Please try again later.",{theme:"colored"});
       })
       .finally(() => setLoading(false));
   };
@@ -171,7 +172,10 @@ const CheckOutComponent = () => {
       </div>
 
       {/* Loading Indicator */}
-      {loading && <div className="text-blue-600 mt-4">Loading...</div>}
+      {loading && <div className="text-blue-600 mt-4 ">
+        <img class="w-20 h-20 animate-spin" src="https://www.svgrepo.com/show/199956/loading-loader.svg" alt="Loading icon"/>
+        </div>}
+      
 
       {/* Address Section */}
       {Array.isArray(address) && address.length > 0 ? (
@@ -331,24 +335,7 @@ const CheckOutComponent = () => {
   <h2 className="text-lg font-semibold mb-4 text-gray-800">Payment Method</h2>
   <p className="text-gray-600 mb-4">Subtotal: {formatPrice(subtotal)}</p>
   <div className="flex flex-col gap-2">
-    <label>
-      <input
-        type="radio"
-        name="payment"
-        value="Credit / Debit Card"
-        onChange={(e) => setPaymentMethod(e.target.value)}
-      />
-      Credit / Debit Card
-    </label>
-    <label>
-      <input
-        type="radio"
-        name="payment"
-        value="PayPal"
-        onChange={(e) => setPaymentMethod(e.target.value)}
-      />
-      UPI
-    </label>
+    
     <label>
       <input
         type="radio"

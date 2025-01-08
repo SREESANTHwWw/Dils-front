@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const CarouselPage = () => {
   const slides = [
     {
-      imgSrc: '../../assets/brushcutter.png',
+      imgSrc: '../../assets/img/images.png',
       imgAlt: '',
     },
     {
