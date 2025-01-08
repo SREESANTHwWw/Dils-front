@@ -205,7 +205,7 @@ const SubCateProduct = () => {
                 <tr key={index} className="even:bg-gray-100">
                   <td className="p-2 border">{product.productname}</td>
                   <td className="p-2 border">
-  <img className='w-[120px] h-[120px]' src={product.product_img} alt="" />
+  <img className='w-28 h-28 rounded-lg object-cover' src={product.product_img} alt="" />
 </td>
                   <td className="p-2 border">₹{product.price}</td>
                   <td className="p-2 border">{product.unitid}</td>

@@ -40,12 +40,13 @@ const SignUpComponent = () => {
   const [gstno, setGstNumber] = useState("");
   const [stateid, setStateCity] = useState("");
   const [validmsg, setValidmsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Submit Handler
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-  
+    setLoading(true)
 
     const config = {
       headers: { "Content-Type": "multipart/form-data" },
@@ -89,6 +90,8 @@ const SignUpComponent = () => {
       }
     } catch (error) {
       toast.error(error.response.data.msg || "An error occurred during registration.");
+    }finally{
+      setLoading(false)
     }
   };
 
@@ -337,6 +340,15 @@ const SignUpComponent = () => {
             </p>
           </div>
         </form>
+        {
+            loading&&(
+              <div className="fixed inset-0 z-50 flex justify-center items-center backdrop-blur-sm">
+          
+          <img class="w-20 h-20 animate-spin" src="https://www.svgrepo.com/show/199956/loading-loader.svg" alt="Loading icon"/>
+         
+          </div>
+            )
+          }
       </div>
     </div>
   );

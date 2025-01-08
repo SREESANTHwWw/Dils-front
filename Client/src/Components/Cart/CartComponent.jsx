@@ -8,7 +8,7 @@ import { server } from "../../Server";
 import { AuthContext } from "../Context/AuthContext";
 
 const CartComponent = () => {
-  const { formatPrice, cartdata } = useContext(ProductsContext);
+  const { formatPrice, cartdata,setLoading ,loading} = useContext(ProductsContext);
   const localdata = localStorage.getItem("user_id");
   const userId = localdata ? JSON.parse(localdata) : [];
   const [cart, setCart] = useState([]);
@@ -19,6 +19,7 @@ const CartComponent = () => {
   const userType = currentUser?.userType || "User"; // Default to 'user' type
 
   const updateQuantity = async (productId, action) => {
+    setLoading(true)
     try {
       const response = await axios.post(`${server}/addToCart`, {
         userId,
@@ -195,6 +196,15 @@ const CartComponent = () => {
             <span className="text-gray-600">Your cart is empty</span>
           )}
         </div>
+        {
+            loading&&(
+              <div className="fixed inset-0 z-50 flex justify-center items-center backdrop-blur-sm">
+          
+          <img class="w-20 h-20 animate-spin" src="https://www.svgrepo.com/show/199956/loading-loader.svg" alt="Loading icon"/>
+         
+          </div>
+            )
+          }
       </div>
     </div>
   );

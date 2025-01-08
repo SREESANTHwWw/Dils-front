@@ -16,7 +16,7 @@ const ProductsContextProvider = (props) => {
   const [currentPage, setCurrentPage] = useState(1); // Track the current page
   const [totalPages, setTotalPages] = useState(1);
   const perpage = 4;
-
+  const [loading, setLoading] = useState(false);
 
 
   const FetchProduct = () => {
@@ -85,8 +85,8 @@ const ProductsContextProvider = (props) => {
     const description = product.description;
     const mRP = product.mRP;
 
-    console.log(Product_id, minimum_order_quantity, userId, price);
-
+ setLoading(true)
+ 
     axios
       .post(`${server}/addToCart`, {
         userId,
@@ -114,7 +114,7 @@ const ProductsContextProvider = (props) => {
       })
       .catch((err) => {
         toast.error(err.response.data.msg, { theme: "colored" });
-      });
+      }).finally(() => setLoading(false))
      
   };
 
@@ -157,7 +157,8 @@ const ProductsContextProvider = (props) => {
         currentPage,
         pageNumbers,
         totalPages,
-        setFilterData
+        setFilterData,
+        loading,setLoading
         
       }}
     >
