@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import brushcutter from '../assets/brushcutter.jpg';
-import rewind from '../assets/rewind.jpg';
 
 const CarouselPage = () => {
   const slides = [
