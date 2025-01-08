@@ -3,15 +3,15 @@ import React, { useState } from 'react';
 const CarouselPage = () => {
   const slides = [
     {
-      imgSrc: '../../public/carvo.png',
+      imgSrc: '../../assets/brushcutter.png',
       imgAlt: '',
     },
     {
-      imgSrc: '../../public/brushcutter.png',
+      imgSrc: '../../assets/rewind.jpg',
       imgAlt: 'Vibrant abstract painting with swirling red, yellow, and pink hues on a canvas.',
     },
     {
-      imgSrc: 'https://penguinui.s3.amazonaws.com/component-assets/carousel/default-slide-3.webp',
+      imgSrc: '../../assets/images',
       imgAlt: 'Vibrant abstract painting with swirling blue and purple hues on a canvas.',
     },
   ];
