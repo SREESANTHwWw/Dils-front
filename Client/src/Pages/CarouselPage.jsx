@@ -13,7 +13,7 @@ const CarouselPage = () => {
       imgAlt: 'rewind',
     },
     {
-      imgSrc: '../assets/images',
+      imgSrc: 'https://res.cloudinary.com/dkz8fh4jt/image/upload/v1736373530/drde5c8uvnsftbtji5zw.jpg',
       imgAlt: 'Vibrant abstract painting with swirling blue and purple hues on a canvas.',
     },
   ];
