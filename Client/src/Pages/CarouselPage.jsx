@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
+import brushcutter from '../assets/brushcutter.jpg';
+import rewind from '../assets/rewind.jpg';
 
 const CarouselPage = () => {
   const slides = [
     {
-      imgSrc: '../../assets/img/images.png',
+      imgSrc: brushcutter,
       imgAlt: '',
     },
     {
-      imgSrc: '../../assets/rewind.jpg',
-      imgAlt: 'Vibrant abstract painting with swirling red, yellow, and pink hues on a canvas.',
+      imgSrc: rewind,
+      imgAlt: 'rewind',
     },
     {
-      imgSrc: '../../assets/images',
+      imgSrc: '../assets/images',
       imgAlt: 'Vibrant abstract painting with swirling blue and purple hues on a canvas.',
     },
   ];
