@@ -19,7 +19,7 @@ const CartComponent = () => {
   const userType = currentUser?.userType || "User"; // Default to 'user' type
 
   const updateQuantity = async (productId, action) => {
-    setLoading(true)
+ 
     try {
       const response = await axios.post(`${server}/addToCart`, {
         userId,
