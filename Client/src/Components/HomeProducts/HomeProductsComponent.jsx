@@ -36,7 +36,7 @@ const HomeProductsComponent = () => {
     return (
       <div className="flex justify-between items-center">
         <p className="text-sm font-medium text-gray-500 line-through">
-          MRP: {formatPrice(product.mRP)}
+        {formatPrice(product.mRP)}
         </p>
         <p className="text-xl font-bold text-green-600">
           {formatPrice(price)}

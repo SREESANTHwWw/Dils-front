@@ -8,14 +8,15 @@ import  Carousel  from '../../Pages/CarouselPage';
 const HomeComponent = () => {
   return (
     <div className="w-full h-full flex flex-col justify-center items-center bg-white scroll-smooth ">
+       <div className="w-full b">
+            <Carousel/>
+          </div>
       <CategoryContextProvider>
         <div className="w-full max-w-7xl mx-auto px-4 ">
   
           
             
-          <div className="w-full b">
-            <Carousel/>
-          </div>
+         
          
 
           

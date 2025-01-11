@@ -20,9 +20,9 @@ const ProductsComponent = () => {
     if (!currentUser) return null; // Don't show prices if no user is logged in
 
     const priceTypes = {
-      user: product.price,
-      medium: product.medium_price,
-      premium: product.premium_price,
+      User: product.price,
+      Medium: product.medium_price,
+      Premium: product.premium_price,
     };
 
     const userType = currentUser.type;

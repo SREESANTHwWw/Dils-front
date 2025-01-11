@@ -92,7 +92,7 @@ const ViewProduct = () => {
                 {/* Zoomed Area */}
                 {isZoomed && (
                   <div
-                    className="absolute inset-0 pointer-events-none rounded-lg"
+                    className="absolute inset-0 pointer-events-none rounded-lg cursor-zoom-in"
                     style={{
                       backgroundImage: `url(${e.product_img})`,
                       backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,

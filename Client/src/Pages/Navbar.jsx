@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+ import React, { useState, useContext, useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { HiOutlineShoppingCart } from "react-icons/hi";
 import { CgProfile } from "react-icons/cg";
@@ -19,7 +19,26 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(""); // Initial state should be an empty string
   const [searchProduct, setFilterData] = useState([]); // Filtered product state
-  const [searchData, setSearchData] = useState(""); // Search query state
+  const [searchData, setSearchData] = useState("");
+  const [responsive, setResponsive] = useState(false); // Search query state
+  const [searchShow, setSearchShow] = useState(false);
+
+  const checkResponsive = () => {
+    if (window.innerWidth <= 640 ) {
+      setResponsive(true); // Set to true for mobile screens
+    } else {
+      setResponsive(false); // Set to false for larger screens
+    }
+  };
+  useEffect(() => {
+    checkResponsive();
+
+    // Add event listener to handle window resize
+    window.addEventListener("resize", checkResponsive);
+
+    // Cleanup the event listener when the component is unmounted
+    return () => window.removeEventListener("resize", checkResponsive);
+  }, []);
 
   const navLoginPage = () => {
     navigate("/login");
@@ -57,7 +76,7 @@ const Navbar = () => {
     setFilterData(filteredProducts); // Update filtered data state
   }, [selectedCategory, searchData, product]); // Re-run the effect when category, search query, or product changes
 
-  console.log(selectedCategory)
+  console.log(selectedCategory);
   const { currentUser } = useContext(AuthContext);
 
   // Function to render price based on user type
@@ -78,7 +97,7 @@ const Navbar = () => {
         <p className="text-sm font-medium text-gray-500 line-through">
           MRP: {formatPrice(product.mRP)}
         </p>
-        <p className="text-xl font-bold text-green-600">{formatPrice(price)}</p>
+        <p className="text-sm font-bold text-green-600">{formatPrice(price)}</p>
       </div>
     );
   };
@@ -88,15 +107,29 @@ const Navbar = () => {
     navigate(`/viewproduct/${productId}`);
   };
 
+  const responsiveSearch = () => {
+    setSearchShow(true);
+  };
+const closeThesearch=()=>{
+  setSearchShow(false)
+  setSearchData("")
+
+}
   return (
     <>
-      <div className="w-full h-auto bg-white shadow-lg flex flex-col fixed top-0 z-50">
+      <div
+        className={`${
+          searchData ? "" : ""
+        }w-full h-auto  bg-white shadow-lg flex flex-col fixed top-0 z-50`}
+      >
         {/* Top Scrolling Announcement */}
         <div className="w-full h-[2rem] bg-gradient-to-r from-blue-600 to-blue-800 text-white flex justify-center items-center">
           <div className="overflow-hidden w-full max-w-7xl mx-auto">
             <div className="flex whitespace-nowrap animate-marquee">
               <span className="mr-8 font-medium text-white">Up to 40% Off</span>
-              <span className="mr-8 font-medium text-white">Exclusive Deals</span>
+              <span className="mr-8 font-medium text-white">
+                Exclusive Deals
+              </span>
               <span className="mr-8 font-medium text-white">New Arrivals</span>
               <span className="mr-8 font-medium text-white">Shop Now</span>
             </div>
@@ -107,17 +140,78 @@ const Navbar = () => {
         <div className="w-full flex flex-col sm:flex-row items-center justify-between py-4 px-6 bg-white shadow-md relative">
           {/* Left Section */}
           <div className="flex items-center gap-4 w-full justify-between sm:w-[70%]">
-            <img className="h-10" src="" alt="Logo" />
+            <img
+              className="h-10 W-3"
+              src={
+                "https://res.cloudinary.com/dkz8fh4jt/image/upload/v1736509842/e3fkw0uklsogg4hyknjn.png"
+              }
+              alt="Logo"
+            />
 
             {/* Search Bar and Category Dropdown */}
-            <div className="flex items-center w-full sm:w-[600px] rounded-md shadow-lg border-2 border-gray-500 transition-all duration-300">
+            {responsive === true ? (
+              <button
+                className="absolute right-14 top-[17px] h-[33px] w-[33px] flex items-center justify-center rounded-md bg-blue-800 text-white hover:bg-blue-900 transition-all duration-300"
+                aria-label="Search Button"
+                onClick={responsiveSearch}
+              >
+                <IoSearch className="text-xl" />
+              </button>
+            ) : (
+              <div
+                className={`items-center sm:flex   w-full sm:w-[600px] rounded-md shadow-lg border-2  border-gray-200 transition-all duration-300 z-[60]`}
+              >
+                {/* Category Dropdown */}
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="h-[50px] rounded-l-md px-2 outline-none transition-all duration-300 w-[150px] sm:w-[120px]"
+                  aria-label="Select Category"
+                >
+                  <option value="">All</option>
+                  {categoryfilter.map((item, index) => (
+                    <option key={index} value={item._id}>
+                      {item.Category_name}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Search Bar */}
+                <div className="relative w-full sm:w-[600px]">
+                  <input
+                    className="w-full h-[50px] pl-3 pr-14 outline-none shadow-lg [&::-webkit-search-cancel-button]:appearance-none"
+                    type="search"
+                    placeholder="Search...."
+                    value={searchData}
+                    onChange={(e) =>
+                      setSearchData(e.target.value.toLowerCase())
+                    }
+                    aria-label="Search"
+                  />
+                  <button
+                    className="absolute right-0 top-0 h-[50px] w-[50px] flex items-center justify-center bg-blue-800 text-white hover:bg-blue-900 transition-all duration-300"
+                    aria-label="Search Button"
+                  >
+                    <IoSearch className="text-xl" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {responsive && searchShow === true && (
+            <div className="w-full flex flex-col sm:flex-row items-center justify-between py-4 px-6 bg-white shadow-md relative">
+            <div
+              className={`items-center flex justify-center absolute  bottom-5 left-1   w-full sm:w-[600px] rounded-md shadow-lg border-2 border-gray-500 transition-all duration-300 z-[60]`}
+            >
               {/* Category Dropdown */}
               <select
-                value={selectedCategory} // Use selected category value
-                onChange={(e) => setSelectedCategory(e.target.value)} // Update selected category
-                className="h-[30px] rounded-md px-2 outline-none transition-all duration-300 w-[150px] sm:w-[120px]"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="h-[50px] rounded-l-md px-2 outline-none transition-all duration-300 w-[150px] sm:w-[120px]"
+                aria-label="Select Category"
               >
-                <option value="">All</option> {/* Default option */}
+                <option value="">All</option>
                 {categoryfilter.map((item, index) => (
                   <option key={index} value={item._id}>
                     {item.Category_name}
@@ -127,22 +221,30 @@ const Navbar = () => {
 
               {/* Search Bar */}
               <div className="relative w-full sm:w-[600px]">
-                {/* Search Input */}
                 <input
-                  className="w-full h-[50px] rounded-md pl-3 pr-14 outline-none shadow-lg"
+                  className="w-full h-[50px] pl-3 pr-14 outline-none shadow-lg [&::-webkit-search-cancel-button]:appearance-none"
                   type="search"
                   placeholder="Search...."
                   value={searchData}
-                  onChange={(e) => setSearchData(e.target.value.toLowerCase())} // Update search data
+                  onChange={(e) => setSearchData(e.target.value.toLowerCase())}
+                  aria-label="Search"
                 />
-
-                {/* Search Button */}
-                <button className="absolute right-0 top-0 h-[50px] w-[50px] flex items-center justify-center bg-blue-800 text-white rounded-r-md hover:bg-blue-900 transition-all duration-300">
+                  {responsive&& searchShow ===true  ?<button
+                  className="absolute right-0 top-0 h-[50px] w-[50px] flex items-center justify-center bg-blue-800 text-white hover:bg-blue-900 transition-all duration-300"
+                  aria-label="Search Button"
+                  onClick={closeThesearch}
+                >
+                  X 
+                </button> :<button
+                  className="absolute right-0 top-0 h-[50px] w-[50px] flex items-center justify-center bg-blue-800 text-white hover:bg-blue-900 transition-all duration-300"
+                  aria-label="Search Button"
+                >
                   <IoSearch className="text-xl" />
-                </button>
+                </button> } 
               </div>
             </div>
-          </div>
+            </div>
+          )}
 
           {/* Mobile Menu Button */}
           <button
@@ -211,25 +313,40 @@ const Navbar = () => {
 
         {/* Search Results Modal */}
         {searchData && (
-          <div className="inset-0 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-b-lg shadow-lg overflow-auto max-h-[80vh] w-full max-w-4xl m-2">
-              <h1 className="text-xl font-bold px-6 py-4 border-b">Search Results</h1>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 py-4 px-6">
-                {searchProduct.map((item, index) => (
-                  <div
-                  onClick={() => navigateProduct(item._id)}
-                  key={index}
-                  className="text-black py-2 shadow-lg border-1 border-gray-500 transition-all duration-300 "
-                >
-                  <p>{item.productname}</p>
-                  <img
-                    src={item.product_img}
-                    alt=""
-                    className="w-12 h-12 rounded-lg object-cover"
-                  />
-                  <p>{renderPrice(item)}</p>
+          <div className="fixed inset-0 z-50 flex justify-center bg-black bg-opacity-50 items-start pt-32">
+            <div className="bg-white rounded-lg shadow-lg overflow-auto max-h-[80vh] w-full max-w-xl">
+              <h1 className="text-lg font-semibold px-4 py-3 bg-gray-100 border-b">
+                Search Results
+              </h1>
+
+              {/* Product Suggestions */}
+              <div className="px-4 py-2 border-t">
+                <h2 className="text-gray-600 font-medium mb-2">
+                  Product Suggestions
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {searchProduct.map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center p-4 bg-gray-50 border rounded-md shadow-sm hover:shadow-lg cursor-pointer transition"
+                      onClick={() => navigateProduct(item._id)}
+                    >
+                      <img
+                        src={item.product_img}
+                        alt={item.productname}
+                        className="w-12 h-12 object-cover rounded-md mr-4"
+                      />
+                      <div>
+                        <p className="font-medium text-gray-800 truncate">
+                          {item.productname}
+                        </p>
+                        <p className="text-sm text-green-600 font-semibold">
+                          {renderPrice(item)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                ))}
               </div>
             </div>
           </div>

@@ -7,6 +7,7 @@ import { ProductsContext } from "../Context/ProductsContext";
 import { toast } from "react-toastify";
 import { useLocation } from "react-router-dom";
 import theme from "@material-tailwind/react/theme";
+import { FaCheck, FaTrash, FaPlus } from "react-icons/fa";
 const CheckOutComponent = () => {
   const [address, setAddress] = useState([]);
   const location = useLocation();
@@ -191,29 +192,37 @@ const CheckOutComponent = () => {
           <div className="text-gray-600">{e.city}, {e.state}</div>
         </div>
         
-        <div className="flex gap-3">
-          {/* Select Button */}
-          <button
-            onClick={() => setSelectedAddress(e)} // Set selected address
-            className={`ml-4 text-blue-600 border px-4 py-2 rounded-md hover:bg-blue-600 hover:text-white transition ${selectedAddress === e ? 'bg-blue-600 text-white' : ''}`}
-          >
-            {selectedAddress === e ? "Selected" : "Select"}
-          </button>
+        
 
-          {/* Delete Button */}
-          <button
-            onClick={() => handleDeleteAddress(e._id)}  // Assuming 'e._id' is the address ID for deletion
-            className="text-red-600 border px-4 py-2 rounded-md hover:bg-red-600 hover:text-white transition"
-          >
-            Delete
-          </button>
-          <button
-      onClick={() => setAddAddress(true)}
-      className="text-blue-600 text-sm hover:bg-blue-900 hover:text-white rounded-md border"
-    >
-      Add Address
-    </button>
-        </div>
+<div className="flex flex-col  gap-3">
+  {/* Select Button */}
+  <button
+    onClick={() => setSelectedAddress(e)} // Set selected address
+    className={`border px-4 py-2 rounded-md hover:bg-blue-600 hover:text-white transition flex items-center justify-center ${
+      selectedAddress === e ? 'bg-blue-600 text-white' : 'text-blue-600'
+    }`}
+  >
+    <FaCheck />
+  </button>
+
+  {/* Delete Button */}
+  <button
+    onClick={() => handleDeleteAddress(e._id)} // Assuming 'e._id' is the address ID for deletion
+    className="border px-4 py-2 rounded-md hover:bg-red-600 hover:text-white transition flex items-center justify-center text-red-600"
+  >
+    <FaTrash />
+  </button>
+
+  {/* Add Address Button */}
+  <button
+    onClick={() => setAddAddress(true)}
+    className="border px-4 py-2 rounded-md hover:bg-blue-900 hover:text-white transition flex items-center justify-center text-blue-600"
+  >
+    <FaPlus />
+  </button>
+</div>
+
+
       </div>
     ))}
   </div>
