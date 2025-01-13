@@ -28,11 +28,11 @@ const FeatureBar = () => {
 
   return (
     <div className="w-full bg-white shadow-md py-6">
-      <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
+      <div className="max-w-7xl mx-auto flex flex-wrap  justify-between items-center">
         {features.map((feature, index) => (
           <div
             key={index}
-            className="flex items-center gap-4 p-4 border-r last:border-r-0 border-gray-200"
+            className="grid grid-cols-1 sm:grid-cols-2 justify-center gap-4 p-4 border-r last:border-r-0 border-gray-200"
           >
             {feature.icon}
             <div>
