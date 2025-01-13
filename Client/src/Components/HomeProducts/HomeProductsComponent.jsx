@@ -45,18 +45,18 @@ const HomeProductsComponent = () => {
     return (
       <div className="flex justify-between items-center space-x-4">
       {/* MRP with Line-Through */}
-      <p className="text-xl font-medium  text-black  ">
+      <p className="sm:text-xl text-sm font-medium  text-black  ">
       {formatPrice(price)}
       </p>
     
       {/* Discount Price */}
-      <p className="text-sm font-bold line-through  text-gray-500">
+      <p className="text-sm line-through  text-gray-500">
      
         {formatPrice(product.mRP)}
       </p>
     
       {/* Discount Percentage */}
-      <p className="text-sm font-semibold text-red-500 bg-red-100 px-2 py-1 rounded-full">
+      <p className="sm:text-sm text-[10px] font-semibold round-md text-red-500 bg-red-100 px-2 py-1 sm:rounded-full">
         {convert}% Off
       </p>
     </div>
@@ -97,7 +97,7 @@ const HomeProductsComponent = () => {
         </div>
 
         {/* Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 w-full">
+        <div className="grid grid-cols-2 sm:w-full w-[350px]  sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 ">
           {filterData.map((product, index) => (
             <div
               key={index}
@@ -106,7 +106,7 @@ const HomeProductsComponent = () => {
               {/* Clickable Product Image */}
               <Link to={`/viewproduct/${product._id}`}>
                 <img
-                  className="w-full h-56 object-cover"
+                  className="w-35 h-35 sm:h-56 sm:w-full object-cover"
                   src={product.product_img}
                   alt={product.productname}
                 />
@@ -116,7 +116,7 @@ const HomeProductsComponent = () => {
               <div className="p-4 flex flex-col flex-1 justify-between">
                 <Link to={`/viewproduct/${product._id}`}>
                   {/* Product Name */}
-                  <h3 className="text-lg font-bold text-gray-800 mb-2 truncate">
+                  <h3 className="sm:text-lg text-sm font-bold text-gray-800 mb-2 truncate">
                     {product.productname}
                   </h3>
 

@@ -38,7 +38,7 @@ const ProductsComponent = () => {
     return (
       <div className="flex justify-between items-center space-x-4">
       {/* MRP with Line-Through */}
-      <p className="text-xl font-medium  text-black  ">
+      <p className="sm:text-xl text-sm font-medium  text-black  ">
       {formatPrice(price)}
       </p>
     
@@ -49,7 +49,7 @@ const ProductsComponent = () => {
       </p>
     
       {/* Discount Percentage */}
-      <p className="text-sm font-semibold text-red-500 bg-red-100 px-2 py-1 rounded-full">
+      <p className="sm:text-sm text-[10px] font-semibold text-red-500 bg-red-100 px-2 py-1 sm:rounded-full">
         {convert}% Off
       </p>
     </div>
@@ -115,7 +115,7 @@ const ProductsComponent = () => {
       <Navbar />
 
       {/* Product Grid */}
-      <div className="w-[85%] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 py-10">
+      <div className="sm:w-[85%] grid grid-cols-2  w-[350px] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 py-10">
         {filterData.map((product, index) => (
           <div
             key={index}
@@ -124,7 +124,7 @@ const ProductsComponent = () => {
             {/* Product Image */}
             <Link to={`/viewproduct/${product._id}`}>
               <img
-                className="w-full h-56 object-cover"
+                className=" w-35 h-35 sm:w-full sm:h-56 object-cover"
                 src={product.product_img}
                 alt={product.productname}
               />
@@ -135,12 +135,12 @@ const ProductsComponent = () => {
               <Link to={`/viewproduct/${product._id}`}>
                 <div>
                   {/* Product Name */}
-                  <h3 className="text-lg font-bold text-gray-800 mb-2 truncate">
+                  <h3 className="sm:text-lg text-sm font-bold text-gray-800 mb-2 truncate">
                     {product.productname}
                   </h3>
 
                   {/* Product Description */}
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                  <p className="sm:text-sm text-[10px] text-gray-600 mb-3 line-clamp-2">
                     {product.description}
                   </p>
 
