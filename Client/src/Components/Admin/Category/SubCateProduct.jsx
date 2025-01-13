@@ -24,7 +24,8 @@ const SubCateProduct = () => {
      const [mRP, setMRP] = useState("");
      const [categoryValue, setCategoryValue] = useState(id || "");
      const [producteditModal ,setOpenProductEdit] =useState(false)
-       const [updateProductId ,setUpdateProductID] = useState("")
+     const [updateProductId ,setUpdateProductID] = useState("")
+     const [unitList, setUnitList] = useState([]);
      
 
 
@@ -39,6 +40,13 @@ const SubCateProduct = () => {
             }
           });
     },[]    )
+
+    useEffect(() => {
+      axios
+        .get(`${server}/getunit`)
+        .then((res) => setUnitList(res.data.getUnit))
+        .catch((err) => console.error("Error fetching units:", err));
+    }, []);
 
 
  const addProduct = (e) => {
@@ -311,14 +319,11 @@ const SubCateProduct = () => {
                   onChange={(e)=>setUnitid(e.target.value)}
                   className="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 hover:border-blue-400 transition"
                 >
-                  <option value="" disabled>Select Type</option>
-                  <option value="MTR">MTR</option>
-                  <option value="SETT">SETT</option>
-                  <option value="LTR">LTR</option>
-                  <option value="ROll">ROll</option>
-                  <option value="No">No</option>
-                  <option value="KG">KG</option>
-                  <option value="No unit">None of the above</option>
+                   <option value="" >Select Type</option>
+                  {unitList.map((e,index)=>(
+                      <option key={index} value={e._id} >{e.unitname}</option>
+
+                  ))}
                 </select>
               </div>
 
@@ -445,14 +450,12 @@ const SubCateProduct = () => {
                   onChange={(e)=>setUnitid(e.target.value)}
                   className="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 hover:border-blue-400 transition"
                 >
-                  <option value="" disabled>Select Type</option>
-                  <option value="MTR">MTR</option>
-                  <option value="SETT">SETT</option>
-                  <option value="LTR">LTR</option>
-                  <option value="ROll">ROll</option>
-                  <option value="No">No</option>
-                  <option value="KG">KG</option>
-                  <option value="No unit">None of the above</option>
+                  
+                  <option value="" >Select Type</option>
+                  {unitList.map((e,index)=>(
+                      <option key={index} value={e.unitname} >{e.unitname}</option>
+
+                  ))}
                 </select>
               </div>
             <input

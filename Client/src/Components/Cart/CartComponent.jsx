@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import Navbar from "../../Pages/Navbar";
 import { ProductsContext } from "../Context/ProductsContext";
 import { MdDelete } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../Server";
 import { AuthContext } from "../Context/AuthContext";
@@ -15,6 +15,7 @@ const CartComponent = () => {
   const [subtotal, setSubtotal] = useState(0);
   const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
+    const [responsive, setResponsive] = useState(false); 
 
   const userType = currentUser?.userType || "User"; // Default to 'user' type
 
@@ -33,6 +34,25 @@ const CartComponent = () => {
       console.error("Error updating quantity:", error);
     }
   };
+
+
+const checkResponsive = () => {
+    if (window.innerWidth <= 640 ) {
+      setResponsive(true); // Set to true for mobile screens
+    } else {
+      setResponsive(false); // Set to false for larger screens
+    }
+  };
+  useEffect(() => {
+    checkResponsive();
+
+    // Add event listener to handle window resize
+    window.addEventListener("resize", checkResponsive);
+
+    // Cleanup the event listener when the component is unmounted
+    return () => window.removeEventListener("resize", checkResponsive);
+  }, []);
+
 
   const removeItem = (id) => {
    
@@ -66,6 +86,25 @@ const CartComponent = () => {
       <div className="w-[90%] sm:w-[80%] lg:w-[60%] flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-blue-950">Shopping Cart</h2>
       </div>
+      {
+        responsive&& (<div className="flex flex-col items-center gap-6">
+          {cart.length > 0 ? (
+            <div className="flex flex-col items-center gap-6">
+              <span className="text-xl font-semibold text-gray-700">
+                Subtotal: {formatPrice(subtotal)}
+              </span>
+              <button
+                className="w-full py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition duration-300"
+                onClick={checkout}
+              >
+                Proceed to Buy
+              </button>
+            </div>
+          ) : (
+            <span className="text-gray-600">Your cart is empty</span>
+          )}
+        </div>)
+      }
 
       {/* Cart Items */}
       <div className="w-full flex flex-col sm:flex-row justify-center gap-5">
@@ -76,20 +115,27 @@ const CartComponent = () => {
                 key={item._id}
                 className="flex flex-col sm:flex-row items-center p-4 bg-white rounded-lg shadow-md border border-gray-300 hover:shadow-xl transition duration-200 relative"
               >
+                 <Link to={`/viewproduct/${item.Product_id}`}>
+                 {console.log(item)}
                 <img
                   className="w-[120px] h-[120px] object-contain rounded-md"
                   src={item.product_img}
                   alt={item.productname}
                 />
-
+              </Link>
                 {/* Product Details */}
                 <div className="flex-1 flex flex-col gap-2 ml-6">
+                <Link to={`/viewproduct/${item.Product_id}`}>
                   <span className="text-lg font-semibold text-blue-950">
                     {item.productname}
                   </span>
+                  <div className="flex items-center w-[10rem]">
                   <span className="text-sm text-gray-600">
                     {item.description}
                   </span>
+                  </div>
+                 
+                  </Link>
 
                   {/* Quantity Controls */}
                   <div className="flex items-center gap-4 mt-2">
@@ -115,7 +161,9 @@ const CartComponent = () => {
                       +
                     </button>
                   </div>
+               
                 </div>
+                
 
                 {/* Price and MRP */}
                 <div className="absolute flex flex-col items-center justify-center top-2 right-4">
@@ -142,7 +190,9 @@ const CartComponent = () => {
                   </button>
                 </div>
               </div>
+              
             ))
+            
           ) : (
             <div className="flex flex-col items-center gap-4 p-8 bg-white rounded-lg shadow-md">
               <p className="text-lg font-medium text-gray-700">

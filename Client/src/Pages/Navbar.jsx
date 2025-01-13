@@ -10,6 +10,13 @@ import { IoMdCloseCircleOutline } from "react-icons/io";
 import { TiThMenu } from "react-icons/ti";
 import { CategoryContext } from "../Components/Context/CategoryContext";
 import { AuthContext } from "../Components/Context/AuthContext";
+import { MdOutlineMail } from "react-icons/md";
+import { FiPhone } from "react-icons/fi";
+import { FaFacebookSquare } from "react-icons/fa";
+
+import { FaInstagramSquare } from "react-icons/fa";
+
+import { FaYoutube } from "react-icons/fa";
 
 const Navbar = () => {
   const { cartlength, product, formatPrice } = useContext(ProductsContext);
@@ -123,35 +130,43 @@ const closeThesearch=()=>{
         }w-full h-auto  bg-white shadow-lg flex flex-col fixed top-0 z-50`}
       >
         {/* Top Scrolling Announcement */}
-        <div className="w-full h-[2rem] bg-gradient-to-r from-blue-600 to-blue-800 text-white flex justify-center items-center">
-          <div className="overflow-hidden w-full max-w-7xl mx-auto">
-            <div className="flex whitespace-nowrap animate-marquee">
-              <span className="mr-8 font-medium text-white">Up to 40% Off</span>
-              <span className="mr-8 font-medium text-white">
-                Exclusive Deals
-              </span>
-              <span className="mr-8 font-medium text-white">New Arrivals</span>
-              <span className="mr-8 font-medium text-white">Shop Now</span>
-            </div>
-          </div>
-        </div>
+        <div className="w-full h-[2rem] bg-gradient-to-r from-blue-900  to-blue-800 text-white flex justify-center items-center">
+  <div className="w-full max-w-7xl mx-auto flex justify-between items-center px-4">
+    {/* Left Section */}
+    <div className="flex items-center space-x-4">
+      <MdOutlineMail aria-label="Email Icon" />
+      <span className="text-sm">Info@gmail.com</span>
+      <FiPhone aria-label="Phone Icon"  />
+      <span className=" text-sm">0002010223</span>
+    </div>
+
+    {/* Right Section */}
+    <div className="flex items-center space-x-4">
+      <FaFacebookSquare aria-label="Facebook Icon" />
+      <FaInstagramSquare aria-label="Instagram Icon" />
+      <FaYoutube aria-label="YouTube Icon" />
+    </div>
+  </div>
+</div>
+
 
         {/* Navbar */}
         <div className="w-full flex flex-col sm:flex-row items-center justify-between py-4 px-6 bg-white shadow-md relative">
           {/* Left Section */}
           <div className="flex items-center gap-4 w-full justify-between sm:w-[70%]">
-            <img
-              className="h-10 W-3"
+            {/* <img
+              className="h-10 w-10"
               src={
                 "https://res.cloudinary.com/dkz8fh4jt/image/upload/v1736509842/e3fkw0uklsogg4hyknjn.png"
               }
               alt="Logo"
-            />
+            /> */}
+            <span className="font-bold text-blue-800 text-[30px] font-mono tracking-tighter hover:text-yellow-600"> Dils Trades</span>
 
             {/* Search Bar and Category Dropdown */}
             {responsive === true ? (
               <button
-                className="absolute right-14 top-[17px] h-[33px] w-[33px] flex items-center justify-center rounded-md bg-blue-800 text-white hover:bg-blue-900 transition-all duration-300"
+                className="absolute right-14 top-[17px] h-[33px] w-[33px] flex items-center rounded-md justify-center  bg-blue-800 text-white hover:bg-blue-900 transition-all duration-300"
                 aria-label="Search Button"
                 onClick={responsiveSearch}
               >
@@ -159,13 +174,13 @@ const closeThesearch=()=>{
               </button>
             ) : (
               <div
-                className={`items-center sm:flex   w-full sm:w-[600px] rounded-md shadow-lg border-2  border-gray-200 transition-all duration-300 z-[60]`}
+                className={`items-center sm:flex rounded-md   w-full sm:w-[600px] shadow-lg border-2  border-gray-200 transition-all duration-300 z-[60]`}
               >
                 {/* Category Dropdown */}
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="h-[50px] rounded-l-md px-2 outline-none transition-all duration-300 w-[150px] sm:w-[120px]"
+                  className="h-[50px] rounded-l-md px-2 font-thin outline-none transition-all duration-300 w-[120px] sm:w-[120px]"
                   aria-label="Select Category"
                 >
                   <option value="">All</option>
@@ -189,7 +204,7 @@ const closeThesearch=()=>{
                     aria-label="Search"
                   />
                   <button
-                    className="absolute right-0 top-0 h-[50px] w-[50px] flex items-center justify-center bg-blue-800 text-white hover:bg-blue-900 transition-all duration-300"
+                    className="absolute right-0 top-0 h-[50px] w-[50px] flex items-center rounded-r-md justify-center bg-blue-800 text-white hover:bg-blue-900 transition-all duration-300"
                     aria-label="Search Button"
                   >
                     <IoSearch className="text-xl" />
@@ -208,7 +223,7 @@ const closeThesearch=()=>{
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="h-[50px] rounded-l-md px-2 outline-none transition-all duration-300 w-[150px] sm:w-[120px]"
+                className="h-[50px] rounded-l-md px-2 outline-none transition-all duration-300 w-[110px] sm:w-[120px]"
                 aria-label="Select Category"
               >
                 <option value="">All</option>

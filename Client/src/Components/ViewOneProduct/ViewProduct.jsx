@@ -13,36 +13,6 @@ const ViewProduct = () => {
   const navigate = useNavigate();
   const { currentUser } = useContext(AuthContext);
 
-  const renderPrice = (product) => {
-    if (!currentUser) return null; // Don't show prices if no user is logged in
-
-    const priceTypes = {
-      User: product.price,
-      Medium: product.medium_price,
-      Premium: product.premium_price,
-    };
-
-    const userType = currentUser.type;
-    const price = priceTypes[userType];
-    console.log(userType)
-
-    return (
-      <div className="flex flex-col gap-2">
-      <span className="text-xl font-bold text-black">
-      {formatPrice(price)}
-      </span>
-      <span className="line-through text-gray-500">
-        M.R.P: {formatPrice(product.mRP)}
-      </span>
-    </div>
-    );
-    
-  };
-  const localdata = localStorage.getItem("user_id");
-
-  const userId = localdata ? JSON.parse(localdata) : [];
-  console.log(userId.length)
-
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const [isZoomed, setIsZoomed] = useState(false);
 
@@ -51,6 +21,34 @@ const ViewProduct = () => {
       setViewone(res.data);
     });
   }, [id]);
+
+  const renderPrice = (product) => {
+    if (!currentUser) return null;
+
+    const priceTypes = {
+      User: product.price,
+      Medium: product.medium_price,
+      Premium: product.premium_price,
+    };
+
+    const mrp = product.mRP;
+    const userType = currentUser.type;
+    const price = priceTypes[userType];
+    const discount = ((mrp - price) / mrp) * 100;
+    const discountPercentage = discount.toFixed();
+
+    return (
+      <div className="flex flex-col gap-2">
+        <p className="text-xl font-bold text-gray-800">{formatPrice(price)}</p>
+        <p className="text-sm line-through text-gray-500">
+          MRP: {formatPrice(mrp)}
+        </p>
+        <p className="text-sm font-semibold w-20 text-red-500 bg-red-100 px-3 py-1 rounded-full">
+          {discountPercentage}% Off
+        </p>
+      </div>
+    );
+  };
 
   const handleMouseMove = (e) => {
     const { left, top, width, height } = e.target.getBoundingClientRect();
@@ -63,21 +61,31 @@ const ViewProduct = () => {
   const handleMouseLeave = () => setIsZoomed(false);
 
   const buyNow = (product) => {
-    
+    if (!currentUser) {
+      console.error("User not logged in.");
+      return;
+    }
+
+    const priceTypes = {
+      User: product.price,
+      Medium: product.medium_price,
+      Premium: product.premium_price,
+    };
+    const userType = currentUser.type;
+    const selectedPrice = priceTypes[userType];
 
     navigate("/checkout", {
-      state: { price: product.price, premium: product.premium_price,medium:product.medium_price,  product: product },
+      state: { price: selectedPrice, product: product },
     });
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center">
       <Navbar />
       {viewOne.length > 0 ? (
-        <div className=" grid grid-cols-1 md:grid-cols-2 gap-8 mt-36 p-6 bg-white  w-full max-w-[98%]">
-          {viewOne.map((e) => (
-            <React.Fragment key={e.id}>
-              {/* Product Image with Amazon-like Zoom */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-32 p-6 bg-white w-full max-w-full  rounded-lg">
+          {viewOne.map((product) => (
+            <React.Fragment key={product.id}>
               <div
                 className="relative flex justify-center items-center overflow-hidden"
                 onMouseMove={handleMouseMove}
@@ -86,15 +94,14 @@ const ViewProduct = () => {
               >
                 <img
                   className="w-[400px] h-[400px] object-cover border rounded-lg"
-                  src={e.product_img}
-                  alt={e.productname}
+                  src={product.product_img}
+                  alt={product.productname}
                 />
-                {/* Zoomed Area */}
                 {isZoomed && (
                   <div
-                    className="absolute inset-0 pointer-events-none rounded-lg cursor-zoom-in"
+                    className="absolute inset-0 pointer-events-none"
                     style={{
-                      backgroundImage: `url(${e.product_img})`,
+                      backgroundImage: `url(${product.product_img})`,
                       backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
                       backgroundSize: "200%",
                       borderRadius: "0.5rem",
@@ -103,41 +110,38 @@ const ViewProduct = () => {
                 )}
               </div>
 
-              {/* Product Details */}
-              <div className="flex flex-col justify-between gap-6 p-4">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-800">
-                    {e.productname}
-                  </h1>
-                  <p className="text-gray-600 mt-2 leading-relaxed">
-                    {e.description}
-                  </p>
-                </div>
+              <div className="flex flex-col gap-6">
+                <h1 className="text-2xl font-bold text-gray-800">
+                  {product.productname}
+                </h1>
+                <p className="text-gray-600 leading-relaxed">
+                  {product.description}
+                </p>
 
-                {/* Price Section */}
-                 {renderPrice(e)}
+                {renderPrice(product)}
 
-                {/* Buttons */}
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-row  items-end h-40 gap-4">
                   <button
-                    onClick={() => Addtocartfun(e)}
-                    className="w-full py-3 bg-blue-900 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300"
+                    onClick={() => Addtocartfun(product)}
+                    className="w-full h-12 py-3 bg-blue-900 text-white font-semibold rounded-md hover:bg-blue-500 transition duration-300"
                   >
                     Add to Cart
                   </button>
-                  <button
-                    onClick={() => buyNow(e)}
-                    className={`${!userId.length > 0? "hidden ":" " }w-full py-3  bg-yellow-500  text-white font-semibold rounded-md hover:bg-yellow-400 transition duration-300`}
-                  >
-                    Buy Now
-                  </button>
+                  {currentUser && (
+                    <button
+                      onClick={() => buyNow(product)}
+                      className="w-full h-12  py-3 bg-yellow-600 text-white font-semibold rounded-md hover:bg-yellow-400 transition duration-300"
+                    >
+                      Buy Now
+                    </button>
+                  )}
                 </div>
               </div>
             </React.Fragment>
           ))}
         </div>
       ) : (
-        <div className="mt-20 text-gray-500 text-lg font-semibold">
+        <div className="mt-24 text-gray-500 text-lg font-semibold">
           Loading product details...
         </div>
       )}

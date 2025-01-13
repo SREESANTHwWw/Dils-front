@@ -21,6 +21,8 @@ const HomeProductsComponent = () => {
   const navtoProducts = () => {navigate("/products")};
 
   // Function to render price based on user type
+
+  
   const renderPrice = (product) => {
     if (!currentUser) return null; // Don't show prices if no user is logged in
 
@@ -29,19 +31,36 @@ const HomeProductsComponent = () => {
       Medium: product.medium_price,
       Premium: product.premium_price,
     };
+    
+    const mrp = product.mRP 
+   
 
     const userType = currentUser.type;
     const price = priceTypes[userType];
+    const percentage = ((mrp -price )/mrp)*100
+    const convert = percentage.toFixed()
+
+
 
     return (
-      <div className="flex justify-between items-center">
-        <p className="text-sm font-medium text-gray-500 line-through">
+      <div className="flex justify-between items-center space-x-4">
+      {/* MRP with Line-Through */}
+      <p className="text-xl font-medium  text-black  ">
+      {formatPrice(price)}
+      </p>
+    
+      {/* Discount Price */}
+      <p className="text-sm font-bold line-through  text-gray-500">
+     
         {formatPrice(product.mRP)}
-        </p>
-        <p className="text-xl font-bold text-green-600">
-          {formatPrice(price)}
-        </p>
-      </div>
+      </p>
+    
+      {/* Discount Percentage */}
+      <p className="text-sm font-semibold text-red-500 bg-red-100 px-2 py-1 rounded-full">
+        {convert}% Off
+      </p>
+    </div>
+    
     );
   };
 
@@ -71,7 +90,7 @@ const HomeProductsComponent = () => {
           </h2>
           <button
             onClick={navtoProducts}
-            className="text-sm w-[80px] font-medium h-[30px] bg-blue-950 rounded-md text-yellow-500 hover:bg-blue-700 transition-colors duration-300"
+            className="text-sm w-[120px] font-medium h-[34px] bg-blue-950 rounded-sm text-white hover:bg-blue-700 transition-colors duration-300"
           >
             Show More
           </button>

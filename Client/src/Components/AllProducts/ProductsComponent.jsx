@@ -24,18 +24,36 @@ const ProductsComponent = () => {
       Medium: product.medium_price,
       Premium: product.premium_price,
     };
+    
+    const mrp = product.mRP 
+   
 
     const userType = currentUser.type;
     const price = priceTypes[userType];
-    console.log(userType);
+    const percentage = ((mrp -price )/mrp)*100
+    const convert = percentage.toFixed()
+
+
 
     return (
-      <div className="flex justify-between items-center">
-        <p className="text-sm font-medium text-gray-500 line-through">
-          MRP: {formatPrice(product.mRP)}
-        </p>
-        <p className="text-xl font-bold text-green-600">{formatPrice(price)}</p>
-      </div>
+      <div className="flex justify-between items-center space-x-4">
+      {/* MRP with Line-Through */}
+      <p className="text-xl font-medium  text-black  ">
+      {formatPrice(price)}
+      </p>
+    
+      {/* Discount Price */}
+      <p className="text-sm font-bold line-through  text-gray-500">
+     
+        {formatPrice(product.mRP)}
+      </p>
+    
+      {/* Discount Percentage */}
+      <p className="text-sm font-semibold text-red-500 bg-red-100 px-2 py-1 rounded-full">
+        {convert}% Off
+      </p>
+    </div>
+    
     );
   };
 

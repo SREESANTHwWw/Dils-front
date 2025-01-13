@@ -28,6 +28,7 @@ const CheckOutComponent = () => {
   const [state, setState] = useState("");
   const localdata = localStorage.getItem("user_id");
   const userId = localdata ? JSON.parse(localdata) : null;
+  
 
   // Fetch cart details
   useEffect(() => {
@@ -64,11 +65,10 @@ const CheckOutComponent = () => {
 
   // Order placement function
   const ordering = () => {
-    if (!selectedAddress) {
-      toast.warning("Please select a shipping address.",{theme:"colored"});
+    if (!selectedAddress || Object.keys(selectedAddress).length === 0) {
+      toast.warning("Please select a shipping address.", { theme: "colored" });
       return;
     }
-
     const orderDetails = cart.map((item) => ({
       productname: item.productname,
       price: item.price,
@@ -374,4 +374,4 @@ const CheckOutComponent = () => {
   );
 };
 
-export default CheckOutComponent;
+export default CheckOutComponent;  

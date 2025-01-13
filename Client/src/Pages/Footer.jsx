@@ -128,7 +128,7 @@ const Footer = () => {
 
       <div className="w-[78%] flex justify-between items-center text-white">
         <span>© 2024 All Rights Reserved</span>
-        <span>Made by Sreeshanth</span>
+        <span>Made by Dils Trades</span>
       </div>
     </div>
   );
