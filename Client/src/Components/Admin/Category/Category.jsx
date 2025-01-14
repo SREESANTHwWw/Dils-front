@@ -134,7 +134,7 @@ const closeEditModal = () => {
   setEditOpenmodal(false);
   
 };
-console.log(editCategoryId)
+
 
 const updateCategory = (e) => {
   e.preventDefault();

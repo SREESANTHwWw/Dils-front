@@ -116,7 +116,7 @@ const checkResponsive = () => {
                 className="flex flex-col sm:flex-row items-center p-4 bg-white rounded-lg shadow-md border border-gray-300 hover:shadow-xl transition duration-200 relative"
               >
                  <Link to={`/viewproduct/${item.Product_id}`}>
-                 {console.log(item)}
+               
                 <img
                   className="w-[120px] h-[120px] object-contain rounded-md"
                   src={item.product_img}

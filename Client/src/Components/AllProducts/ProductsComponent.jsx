@@ -63,7 +63,7 @@ const ProductsComponent = () => {
     axios
       .get(`${server}/get-all-products?page=${currentPage}`)
       .then((res) => {
-        console.log(res.data);
+        
         setProducts(res.data.results);
         setTotalPages(res.data.totalPages); // Set products data
       })

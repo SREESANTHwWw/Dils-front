@@ -25,7 +25,7 @@ const Sidebar = () => {
     { icon: <Users size={20} />, label: 'Users', section: 'users' },
     { icon: <Package size={20} />, label: 'Unit', section: 'unit' },
     { icon: <PackageX size={20} />, label: 'Edit Products', section: 'editProducts' },
-    { icon: <LogOut size={20} />, label: 'Logout', section: 'logout' },
+  
   ];
 
   return (

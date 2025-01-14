@@ -83,7 +83,7 @@ const Navbar = () => {
     setFilterData(filteredProducts); // Update filtered data state
   }, [selectedCategory, searchData, product]); // Re-run the effect when category, search query, or product changes
 
-  console.log(selectedCategory);
+ 
   const { currentUser } = useContext(AuthContext);
 
   // Function to render price based on user type
@@ -215,7 +215,7 @@ const closeThesearch=()=>{
           </div>
 
           {responsive && searchShow === true && (
-            <div className="w-full flex flex-col sm:flex-row items-center justify-between py-4 px-6 bg-white shadow-md relative">
+            <div className="w-full flex flex-col sm:flex-row items-center justify-between bottom-3 right-0 py-4 px-6 bg-white  relative">
             <div
               className={`items-center flex justify-center absolute  bottom-5 left-1   w-full sm:w-[600px] rounded-md shadow-lg border-2 border-gray-500 transition-all duration-300 z-[60]`}
             >
@@ -223,7 +223,7 @@ const closeThesearch=()=>{
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="h-[50px] rounded-l-md px-2 outline-none transition-all duration-300 w-[110px] sm:w-[120px]"
+                className="h-[50px] rounded-l-md px-2 outline-none transition-all duration-300 sm:text-md text-[12px] w-[90px] sm:w-[120px]"
                 aria-label="Select Category"
               >
                 <option value="">All</option>

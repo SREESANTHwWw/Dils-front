@@ -17,6 +17,8 @@ const [fullname, setFullname] = useState("");
   const [phonenumber, setPhonenumber] = useState("");
   const [landmark, setLandmark] = useState("");
   const [state, setState] = useState("");
+  
+  const[addressId,setAddressid]=useState("")
   const fetchAddress = () => {
     axios.get(`${server}/getAddress/${userId}`).then((res) => {
       setAddress(res.data);
@@ -24,12 +26,25 @@ const [fullname, setFullname] = useState("");
   };
 
  
+const edit = (ad)=>{
+  setAddressid(ad._id)
+  setFullname(ad.fullname)
+  setPhonenumber(ad.phonenumber)
+  setLandmark(ad.landmark)
+  setPincode(ad.Pincode)
+  setCity(ad.city)
+  setState(ad.state)
+  setEditAddress(true)
 
-  const editAddress = (Id ) => {
-    setEditAddress(true)
+}
+
+
+  const editAddress = (e ) => {
+    e.preventDefault()
+    
       
 
-    axios.patch(`${server}/editAddress/${Id}`,{
+    axios.patch(`${server}/editAddress/${addressId}`,{
       fullname,
       Pincode,
       city,
@@ -38,8 +53,16 @@ const [fullname, setFullname] = useState("");
       state,
 
 
-    }).then((res) = console.log(res))
+    }).then((res) =>{
+         const editedAddress = res.data.editedAddress
+        
+         setAddress((prev) =>
+          prev.map((unit) => (unit._id === editedAddress._id ? editedAddress : unit))
+        );
+        setEditAddress(false)
+        })
   };
+
 
   useEffect(() => {
     fetchAddress();
@@ -67,6 +90,8 @@ const [fullname, setFullname] = useState("");
         });
     }
   };
+
+
   
 
   return (
@@ -91,7 +116,7 @@ const [fullname, setFullname] = useState("");
                 </div>
                 <div className="flex gap-4 mt-4">
                   <button
-                    onClick={() => editAddress(e)}
+                    onClick={() => edit(e)}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300"
                   >
                   <FiEdit className="mr-2" /> 
@@ -119,6 +144,7 @@ const [fullname, setFullname] = useState("");
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">Add Address</h2>
   
               {/* Form Fields */}
+              <form onSubmit={editAddress}>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-gray-700 mb-1">Full Name</label>
@@ -201,11 +227,12 @@ const [fullname, setFullname] = useState("");
                 </button>
                 <button
                   className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                  onClick={()=>setEditAddress(false)}
+                  type='submit'
                 >
                   Save Address
                 </button>
               </div>
+              </form>
             </div>
           </div>
       )}

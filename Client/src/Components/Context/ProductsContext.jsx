@@ -25,7 +25,7 @@ const ProductsContextProvider = (props) => {
     axios
       .get(`${server}/get-products?page=${currentPage}`)
       .then((res) => {
-        console.log(res.data);
+       
         setProducts(res.data.results)
         setTotalPages(res.data.totalPages); // Set products data
        

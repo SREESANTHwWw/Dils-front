@@ -85,7 +85,7 @@ const ViewProduct = () => {
       {viewOne.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-32 p-6 bg-white w-full max-w-full  rounded-lg">
           {viewOne.map((product) => (
-            <React.Fragment key={product.id}>
+            <React.Fragment key={product._id}>
               <div
                 className="relative flex justify-center items-center overflow-hidden"
                 onMouseMove={handleMouseMove}
