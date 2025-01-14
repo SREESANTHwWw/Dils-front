@@ -203,7 +203,7 @@ const SignUpComponent = () => {
                 placeholder="GST (Optional)"
                 value={gstno}
                 onChange={(e) => setGstNumber(e.target.value)}
-                required
+               
                 aria-label="Username"
                 className="w-full h-12 pl-10 rounded-lg shadow-sm outline-none focus:ring-1 focus:ring-blue-950"
               />
@@ -212,7 +212,7 @@ const SignUpComponent = () => {
             </div>
             <div className="relative">
               <input
-                type="number"
+                type="text"
                 placeholder="state"
                 value={stateid}
                 onChange={(e) => setStateCity(e.target.value)}
