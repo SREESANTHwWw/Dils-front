@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { lazy, Suspense, useContext } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Navbar from "./Pages/Navbar";
 import Login from "./Pages/Login";
@@ -8,14 +8,16 @@ import Cart from "./Pages/Cart";
 import Profile from "./Pages/Profile";
 import ProfileEdit from "./Pages/ProfileEdit";
 import Home from "./Pages/Home";
-import Products from "./Pages/Products";
+// import Products from "./Pages/Products";
 import ProductsContextProvider from "./Components/Context/ProductsContext";
 import CategoryContextProvider from "./Components/Context/CategoryContext";
 import SignupvalContextProvider from "./Components/Context/SignupInputValContext";
 import { ToastContainer, Zoom } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import AuthContextProvider, { AuthContext } from "./Components/Context/AuthContext";
-import Admin from "./Components/Admin/Admin";
+import AuthContextProvider, {
+  AuthContext,
+} from "./Components/Context/AuthContext";
+// import Admin from "./Components/Admin/Admin";
 import AllUsers from "./Components/Admin/Users/AllUsers";
 import ProtectedRoute from "./Components/ProtectedRoute";
 import CheckoutPage from "./Pages/CheckoutPage";
@@ -24,6 +26,10 @@ import ViewProduct from "./Components/ViewOneProduct/ViewProduct";
 import CategoryTable from "./Components/Admin/Category/Category";
 import Category from "./Components/Admin/Category/Category";
 import SubCate from "./Components/Admin/Category/SubCate";
+import { Loading } from "./Pages/Loading";
+
+const Admin = lazy(() => import("./Components/Admin/Admin"));
+const Products = lazy(()=> import("./Pages/Products"))
 
 const App = () => {
   const { isAuthenticated, adminData, currentUser } = useContext(AuthContext);
@@ -36,14 +42,19 @@ const App = () => {
             <ProductsContextProvider>
               <BrowserRouter>
                 <Routes>
-                <Route path="/login" element={<LoginRe />} />
-                <Route path="/signup" element={<SignUp />} />
+                  <Route path="/login" element={<LoginRe />} />
+                  <Route path="/signup" element={<SignUp />} />
                   {/* Public Routes */}
                   <Route path="/" element={<Navbar />}>
                     <Route index element={<Home />} />
-                   
-                   
-                    <Route path="/products" element={<Products />} />
+
+                    <Route path="/products" element={
+                      <Suspense fallback={<Loading/>}>
+ <Products />
+                      </Suspense>
+                     
+                      
+                      } />
                     <Route path="/viewproduct/:id" element={<ViewProduct />} />
                   </Route>
 
@@ -52,13 +63,14 @@ const App = () => {
                     path="/admin/*"
                     element={
                       <ProtectedRoute allowedTypes={["admin"]}>
-                        <Admin />
+                        <Suspense fallback={"loading..."}>
+                          <Admin />
+                        </Suspense>
                       </ProtectedRoute>
                     }
                   >
                     <Route path="users" element={<AllUsers />} />
                     <Route path="category" element={<Category />} />
-                   
                   </Route>
 
                   <Route path="/profile" element={<Profile />} />
