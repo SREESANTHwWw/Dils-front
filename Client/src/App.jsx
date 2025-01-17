@@ -42,7 +42,10 @@ const App = () => {
             <ProductsContextProvider>
               <BrowserRouter>
                 <Routes>
-                  <Route path="/login" element={<LoginRe />} />
+                  <Route path="/login" element={
+                    
+                    <LoginRe />} 
+                    />
                   <Route path="/signup" element={<SignUp />} />
                   {/* Public Routes */}
                   <Route path="/" element={<Navbar />}>
