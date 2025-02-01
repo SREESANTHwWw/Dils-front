@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiLogOut } from "react-icons/fi";
 import { BiMessageSquareEdit } from "react-icons/bi";
@@ -11,19 +11,45 @@ import { HiHashtag } from "react-icons/hi";
 import Navbar from "./Navbar"; // Import your Navbar component
 import Userorders from "../Components/Userorders/Userorders";
 import { Useraddress } from "../Components/UserAddress/Useraddress";
-
+import axios from "axios";
+import { requestFcmToken,  } from '../FirebaseUtils';
 const Profile = () => {
   const navigate = useNavigate();
+  const localdata = localStorage.getItem("currentUser");
+  const userData = localdata ? JSON.parse(localdata) : [];
+  const localdataStore = localStorage.getItem("user_id");
+const userId = localdataStore ? JSON.parse(localdataStore) : [];
+  const [token, setToken] = useState("");
+
+  useEffect(() => {
+   const FetchToken = async()=>{
+    try {
+      const fcmtoken = await requestFcmToken()
+      if(fcmtoken){
+        setToken(fcmtoken)
+      }
+    } catch (error) {
+      console.log( "geting Token Error", error)
+    }
+ 
+   }
+   FetchToken()
+  }, []);
   const editpage = () => navigate("/editpage");
 
   const logout = () => {
     localStorage.clear();
     navigate("/");
     window.location.reload();
+    axios.delete(`${server}/remove-fcm-token`,{
+      userId,
+      token
+      
+    }).then((res)=>{console.log("deleted") ,res }    )
+
   };
 
-  const localdata = localStorage.getItem("currentUser");
-  const userData = localdata ? JSON.parse(localdata) : [];
+  
 
   const [activeSection, setActiveSection] = useState("My Details");
 

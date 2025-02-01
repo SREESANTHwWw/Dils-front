@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { server } from "../../../Server";
+import { toast } from "react-toastify";
 
 const AllUsers = () => {
   const [users, setUsers] = useState([]);
@@ -8,8 +9,14 @@ const AllUsers = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [notifiOpen, setNotifiOpen] = useState(false);
+  const[title, setTitles] = useState("Dils Trades")
+const [body, setBodymessage] = useState("")
+const [token, settoken] = useState("")
 
-
+const [allUser, setallUser] = useState([])
+const [searchUser, setSearchUser] = useState("");
+const [filterData, setFilterData] = useState([])
 
   const fetchUsers=()=>{
     axios
@@ -21,6 +28,7 @@ const AllUsers = () => {
     .catch((error) => console.error("Error fetching users:", error));
 
   }
+
 
   useEffect(() => {
     fetchUsers()
@@ -86,11 +94,86 @@ const AllUsers = () => {
 
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
+
+
+  // Send Notification
+  const handleSend = (id) => {
+    setNotifiOpen(true);
+
+    axios.get(`${server}/getToken/${id}`).then((res) => {
+        const receivedToken = res.data.token?.token; // Safely accessing token
+        const error = res.data.error;
+
+        if (error) {
+            console.error("Error:", error);
+            toast.error("An error occurred while fetching the token.");
+            setNotifiOpen(false);
+            return;
+        }
+
+        if (!receivedToken) {
+            toast.info("Permission Not Granted");
+            setNotifiOpen(false);
+            return;
+        }
+
+        settoken(receivedToken);
+    }).catch((err) => {
+        console.error("Request failed:", err);
+        toast.info("Permission Not Granted");
+        setNotifiOpen(false);
+    });
+};
+
+const SendNotication = (e)=>{ 
+  axios.post(`${server}/send-notification`,{
+    token,
+    title,
+    body,
+  }).then((res)=>{
+    console.log(res)
+  })
+
+
+ 
+
+}
+const getAllusers =()=>{
+  axios.get(`${server}/get-all-users`).then((res)=>{
+    setallUser(res.data.getusers)
+    
+  })
+}
+useEffect(() => {
+  getAllusers()
+}, [])
+
+useEffect(()=>{
+
+  let filteredUsers = allUser
+
+  if(searchUser){
+    filteredUsers = allUser.filter((user)=> user.shopname.toLowerCase().includes(searchUser)) 
+  }
+  setUsers(filteredUsers)
+
+},[searchUser, allUser])
+
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-        Users Management
-      </h2>
+      <div className="w-full flex justify-between">
+      <h2 className="text-2xl font-bold mb-4">Products</h2>
+      <div className="flex items-center mb-4 space-x-2">
+  <input
+    type="text"
+    value={searchUser}
+    onChange={(e) => setSearchUser(e.target.value.toLowerCase())}
+    placeholder="Search ShopName"
+    className="w-64 h-10 px-4 border rounded-md shadow-sm focus:outline-none focus:border-blue-500"
+  />
+ 
+</div>
+</div>
 
       <div className="overflow-x-auto border border-gray-200 rounded-md">
         <table className="min-w-full text-sm text-gray-700">
@@ -123,6 +206,7 @@ const AllUsers = () => {
                 <tr
                   key={user._id}
                   className="hover:bg-gray-50 transition-colors"
+                  onClick={() => handleSend(user._id)}
                 >
                   <td className="p-3">{user.shopname}</td>
                   <td className="p-3">
@@ -201,6 +285,35 @@ const AllUsers = () => {
 </div>
 
       </div>
+      {
+        notifiOpen && ( 
+           <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full sm:w-11/12 md:w-2/3 lg:w-1/3 shadow-2xl transform transition-all scale-95 hover:scale-100 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">Send Notification</h3>
+            <form onSubmit={SendNotication} className="grid grid-cols-1 gap-4">
+              <input value={body} className="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 hover:border-blue-400 transition" type="text" onChange={(e)=>setBodymessage(e.target.value)} />
+              <div className="col-span-2 flex justify-end gap-3 mt-4">
+                <button
+                  type="button"
+                  
+                  onClick={()=>setNotifiOpen(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 transition"
+                >
+                  Send
+                </button>
+              </div>
+            </form>
+         </div>
+         </div>
+
+        )
+      }
 
       {/* Edit Modal */}
       {isModalOpen && editUser && (

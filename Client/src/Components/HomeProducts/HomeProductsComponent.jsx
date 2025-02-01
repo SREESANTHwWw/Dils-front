@@ -18,7 +18,7 @@ const HomeProductsComponent = () => {
   const { currentUser } = useContext(AuthContext);
 
   // Navigate to the Products page
-  const navtoProducts = () => {navigate("/products")};
+
 
   // Function to render price based on user type
 
@@ -88,12 +88,7 @@ const HomeProductsComponent = () => {
           <h2 className="sm:text-3xl text-md font-bold text-gray-800 tracking-wide">
             New Fast Moving Products
           </h2>
-          <button
-            onClick={navtoProducts}
-            className="text-sm w-[120px] font-medium h-[34px] bg-blue-950 rounded-sm text-white hover:bg-blue-700 transition-colors duration-300"
-          >
-            Show More
-          </button>
+       
         </div>
 
         {/* Product Grid */}

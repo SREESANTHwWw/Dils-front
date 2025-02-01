@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useContext } from "react";
+import React, { lazy, Suspense, useContext, useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Navbar from "./Pages/Navbar";
 import Login from "./Pages/Login";
@@ -12,7 +12,7 @@ import Home from "./Pages/Home";
 import ProductsContextProvider from "./Components/Context/ProductsContext";
 import CategoryContextProvider from "./Components/Context/CategoryContext";
 import SignupvalContextProvider from "./Components/Context/SignupInputValContext";
-import { ToastContainer, Zoom } from "react-toastify";
+import { toast, ToastContainer, Zoom } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AuthContextProvider, {
   AuthContext,
@@ -28,12 +28,67 @@ import Category from "./Components/Admin/Category/Category";
 import SubCate from "./Components/Admin/Category/SubCate";
 import { Loading } from "./Pages/Loading";
 
+
+import { requestFcmToken,onMessageListener  } from './FirebaseUtils';
+import axios from "axios";
+import { server } from "./Server";
+
+
 const Admin = lazy(() => import("./Components/Admin/Admin"));
 const Products = lazy(()=> import("./Pages/Products"))
+const localdata = localStorage.getItem("user_id");
+const userId = localdata ? JSON.parse(localdata) : [];
 
 const App = () => {
   const { isAuthenticated, adminData, currentUser } = useContext(AuthContext);
+  const [token, setToken] = useState("");
+ 
 
+  useEffect(() => {
+   const FetchToken = async()=>{
+    try {
+      const fcmtoken = await requestFcmToken()
+      if(fcmtoken){
+        setToken(fcmtoken)
+      }
+    } catch (error) {
+      console.log( "geting Token Error", error)
+    }
+ 
+   }
+   FetchToken()
+   
+
+  }, []);
+
+  useEffect(() => {
+    if (token && userId) {
+      axios
+        .post(`${server}/save-fcm-token`, {
+          token,
+          userId,
+        })
+        .then((res) => {
+          console.log("Token Saved", res);
+        })
+        .catch((err) => {
+          console.log("Error Saving Token:", err);
+        });
+    }
+  }, [token, userId]);
+
+  onMessageListener().then((payload)=>{
+    toast(
+      <div>
+       <strong> {payload.notification.title}</strong>
+       <strong> {payload.notification.body}</strong>
+      </div>
+    )
+    console.log('Message received. ', payload);
+
+  })
+  .catch((err)=>{ console.log('Error occured', err)})   
+  
   return (
     <div>
       <AuthContextProvider>

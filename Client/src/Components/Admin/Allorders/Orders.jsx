@@ -46,7 +46,7 @@ useEffect(()=>{
       return "";
     }
 
-    return formattedDate.format("YYYY-MM-DD");
+    return formattedDate.format("MM-DD-YYYY");
   };
 
   // Filter orders by the formatted date
