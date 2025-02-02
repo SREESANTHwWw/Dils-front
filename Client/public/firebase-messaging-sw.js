@@ -4,13 +4,13 @@ importScripts('https://www.gstatic.com/firebasejs/8.2.0/firebase-messaging.js');
 
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyDimbJXAbGL6xRy4i_P9eAW8ywDpj4UVx8",
-  authDomain: "dils-trades-push.firebaseapp.com",
-  projectId: "dils-trades-push",
-  storageBucket: "dils-trades-push.firebasestorage.app",
-  messagingSenderId: "917539798900",
-  appId: "1:917539798900:web:06731e426b2587cf54b621",
-  measurementId: "G-H8WWNSD18J"
+  apiKey: "AIzaSyCMPXIClVn-liX020ftYLNo0Dd6okJRIeg",
+  authDomain: "dilstradescom.firebaseapp.com",
+  projectId: "dilstradescom",
+  storageBucket: "dilstradescom.firebasestorage.app",
+  messagingSenderId: "812023950321",
+  appId: "1:812023950321:web:c2ffaf663272a7f6b03250",
+  measurementId: "G-P6588HNXD4"
 };
 
 firebase.initializeApp(firebaseConfig);
