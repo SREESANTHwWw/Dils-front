@@ -126,12 +126,24 @@ const [filterData, setFilterData] = useState([])
 };
 
 const SendNotication = (e)=>{ 
+  e.preventDefault()
   axios.post(`${server}/send-notification`,{
     token,
     title,
     body,
   }).then((res)=>{
-    console.log(res)
+    const Response = res.data.msg
+  
+    if(Response === "sent successfully"){
+      toast.success("Notification Sent Successfully")
+      setNotifiOpen(false)
+      setBodymessage("")
+    }else{
+      toast.error("Notification Not Sent")
+    }
+   
+  }).then((error)=>{
+    console.error("Error:", error)
   })
 
 
