@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { useLocation } from "react-router-dom";
 import theme from "@material-tailwind/react/theme";
 import { FaCheck, FaTrash, FaPlus } from "react-icons/fa";
+import { jwtDecode } from "jwt-decode";
 const CheckOutComponent = () => {
   const [address, setAddress] = useState([]);
   const location = useLocation();
@@ -28,7 +29,8 @@ const CheckOutComponent = () => {
   const [state, setState] = useState("");
   const localdata = localStorage.getItem("user_id");
   const userId = localdata ? JSON.parse(localdata) : null;
-  
+  const token = localStorage.getItem("token");
+  const tokedata = jwtDecode(token)
 
   // Fetch cart details
   useEffect(() => {
@@ -63,19 +65,30 @@ const CheckOutComponent = () => {
     }
   }, [userId]);
 
+  console.log(cart)
   // Order placement function
   const ordering = () => {
+
     if (!selectedAddress || Object.keys(selectedAddress).length === 0) {
       toast.warning("Please select a shipping address.", { theme: "colored" });
       return;
     }
     const orderDetails = cart.map((item) => ({
+      product_img: item.product_img,
       productname: item.productname,
       price: item.price,
+      unitid: item.unitid,
       minimum_order_quantity: item.minimum_order_quantity,
-      address: selectedAddress, // Use selected address
-    }));
+      address: selectedAddress, 
+    }))
 
+    const userinfo = [{
+      shopname:tokedata.shopname,
+      username :tokedata.username,
+      phonenumber :tokedata.phonenumber
+  }]
+  
+   
     
     setLoading(true);
     axios
@@ -83,6 +96,7 @@ const CheckOutComponent = () => {
         userId,
         orderDetails,
         address: selectedAddress,
+       userinfo,
         subtotal,
         paymentMethod,
       })

@@ -10,6 +10,9 @@ import SubCate from "./Category/SubCate";
 import SubCateProduct from "./Category/SubCateProduct";
 import Unit from "./Unit/Unit";
 
+import ViewOrders from "./ViewOrders/ViewOrders";
+import AdminDashBoard from "./AdminDash/AdminDashBoard";
+
 const Admin = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false); // Dropdown state
@@ -39,8 +42,9 @@ const Admin = () => {
   }, []);
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen  bg-gray-100">
       {/* Sidebar */}
+   
       <Sidebar />
 
       {/* Main Content */}
@@ -75,9 +79,10 @@ const Admin = () => {
         {/* Main Content Area */}
         <div className="flex-1 p-6">
           <Routes>
-            <Route path="dashboard" element={<div>Dashboard</div>} />
+            <Route path="dashboard" element={<AdminDashBoard/>} />
             <Route path="category" element={<Category />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="vieworders/:id" element={<ViewOrders />} />
             <Route path="users" element={<AllUsers />} />
             <Route path="unit" element={<Unit />} />
             <Route path="editProducts" element={<EditProducts />} />

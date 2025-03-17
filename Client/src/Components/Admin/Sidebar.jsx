@@ -33,7 +33,7 @@ const Sidebar = () => {
       {/* Sidebar */}
       <div className={`h-screen  bg-white transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
         {/* Header */}
-        <div className="p-5 border-b flex items-center gap-4">
+        <div className="p-5 border-b flex h-20 bg-white items-center gap-4">
          
           {!isCollapsed && <h2 className="font-semibold bg-blue-800  flex items-center justify-center rounded-md w-[120px] h-[40px]  text-white">DILS TRADING</h2>}
           <button

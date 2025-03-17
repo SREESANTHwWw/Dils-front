@@ -4,6 +4,7 @@ import { server } from '../../../Server';
 import { ProductsContext } from '../../Context/ProductsContext';
 import moment from 'moment';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const Orders = () => {
   const [allOrders, setAllOrders] = useState([]);
@@ -13,6 +14,7 @@ const Orders = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [filter, setFilter] = useState("");
   const [finishFilter, setFinish] = useState([]);
+  const navigate = useNavigate();
 
   // Fetch all orders
   const fetchAllOrders = () => {
@@ -46,7 +48,7 @@ useEffect(()=>{
       return "";
     }
 
-    return formattedDate.format("MM-DD-YYYY");
+    return formattedDate.format("DD-MM-YYYY");
   };
 
   // Filter orders by the formatted date
@@ -68,18 +70,11 @@ useEffect(()=>{
 
  
 
-  // Update Order Status
-  const handleUpdateStatus = (orderId) => {
-     setLoading(true)
-    axios.patch(`${server}/updateOrders/${orderId}`, {
-      status,
-    }).then((res) => {
-      fetchAllOrders();
-      setLoading(false)
-    }).catch((err)=>{
-      toast.error("Order Loading Error")
-    }).finally(()=>setLoading(false))
-  };
+
+
+const handleViewOrder = (order)=>{
+  navigate(`/admin/vieworders/${order._id}`)
+}
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -124,7 +119,7 @@ useEffect(()=>{
         <div className="flex items-center gap-2 mb-6">
   <input
     type="search"
-    placeholder="Search by date (YYYY-MM-DD)..."
+    placeholder="Search by date (MM-DD-YYYY)..."
     value={filter}
     onChange={(e) => {
       setFilter(e.target.value);
@@ -153,63 +148,62 @@ useEffect(()=>{
 
       </div>
 
-      {allOrders &&  finishFilter.length > 0 ? (
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-300">
-            <thead>
-              <tr className="border-b">
-                <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Order ID</th>
-                <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Products</th>
-                <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Subtotal</th>
-                <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Status</th>
-                <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Order Date</th>
-                <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allOrders && finishFilter.map((order) => (
-                <tr key={order._id} className="border-b">
-                  <td className="py-3 px-4 text-sm text-gray-800">{order._id}</td>
-                  <td className="py-3 px-4 text-sm text-gray-600">
-                    {order.products && order.products.map((product, index) => (
-                      <div key={index}>
-                        <p><strong>{product.productname}</strong> x {product.minimum_order_quantity}</p>
-                        <p className="text-gray-500">{formatPrice(product.price)}</p>
-                      </div>
-                    ))}
-                  </td>
-                  <td className="py-3 px-4 text-sm text-gray-800">{formatPrice(order.subtotal)}</td>
-                  <td className={`py-3 px-4 text-sm ${getStatusColor(order.status)}`}>{order.status}</td>
-                  <td className="py-3 px-4 text-sm text-gray-800">{new Date(order.orderDate).toLocaleDateString()}</td>
-                  <td className="py-3 px-4 text-sm">
-                    <div className="flex gap-2 items-center">
-                      <select
-                        value={status}
-                        onChange={(e) => setStatus(e.target.value)}
-                        className="border border-gray-300 rounded px-4 py-1 text-sm"
-                      >
-                        <option value="Pending">Pending</option>
-                        <option value="Order Confirmed">Order Confirmed</option>
-                        <option value="Shipped">Shipped</option>
-                        <option value="Delivered">Delivered</option>
-                        <option value="Canceled">Canceled</option>
-                      </select>
-                      <button
-                        onClick={() => handleUpdateStatus(order._id)}
-                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm"
-                      >
-                        Update
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p className="text-gray-500">No orders available.</p>
-      )}
+      {allOrders && finishFilter.length > 0 ? (
+  <div className="overflow-x-auto">
+    <table className="min-w-full bg-white border border-gray-300">
+      <thead className="bg-gray-100">
+        <tr className="border-b">
+          <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">SL No</th>
+          <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Shop</th>
+          <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">User</th>
+          <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Phone</th>
+          <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Total Amount</th>
+          <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Status</th>
+          <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Order Date</th>
+          <th className="py-3 px-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {finishFilter.map((order, index) => (
+          <tr key={order._id} className="border-b hover:bg-gray-50">
+            <td className="py-3 px-4 text-sm text-gray-800">{index + 1}</td>
+
+            {order.UserData && order.UserData.length > 0 ? (
+              <>
+                <td className="py-3 px-4 text-sm text-gray-600">{order.UserData[0].shopname}</td>
+                <td className="py-3 px-4 text-sm text-gray-600">{order.UserData[0].username}</td>
+                <td className="py-3 px-4 text-sm text-gray-600">{order.UserData[0].phonenumber}</td>
+              </>
+            ) : (
+              <>
+                <td className="py-3 px-4 text-sm text-gray-600">-</td>
+                <td className="py-3 px-4 text-sm text-gray-600">-</td>
+                <td className="py-3 px-4 text-sm text-gray-600">-</td>
+              </>
+            )}
+
+            <td className="py-3 px-4 text-sm text-gray-800">{formatPrice(order.subtotal)}</td>
+            <td className={`py-3 px-4 text-sm font-semibold ${getStatusColor(order.status)}`}>
+              {order.status}
+            </td>
+            <td className="py-3 px-4 text-sm text-gray-800">{new Date(order.orderDate).toLocaleDateString()}</td>
+            <td className="py-3 px-4 text-sm">
+              <button
+                onClick={() => handleViewOrder(order)}
+                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm"
+              >
+                View Order
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+) : (
+  <p className="text-gray-500 text-center mt-4">No orders available.</p>
+)}
+
 
       {/* Pagination */}
       <div className="flex justify-center mt-6 gap-4">
@@ -236,33 +230,7 @@ useEffect(()=>{
         >
           Next
         </button>
-        {
-            loading&&(
-              <div className="fixed inset-0 z-50 flex justify-center items-center backdrop-blur-sm">
-          
-          <div aria-label="Loading..." role="status" class="flex items-center space-x-2">
-    <svg class="h-20 w-20 animate-spin stroke-green-700" viewBox="0 0 256 256">
-        <line x1="128" y1="32" x2="128" y2="64" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line>
-        <line x1="195.9" y1="60.1" x2="173.3" y2="82.7" stroke-linecap="round" stroke-linejoin="round"
-            stroke-width="24"></line>
-        <line x1="224" y1="128" x2="192" y2="128" stroke-linecap="round" stroke-linejoin="round" stroke-width="24">
-        </line>
-        <line x1="195.9" y1="195.9" x2="173.3" y2="173.3" stroke-linecap="round" stroke-linejoin="round"
-            stroke-width="24"></line>
-        <line x1="128" y1="224" x2="128" y2="192" stroke-linecap="round" stroke-linejoin="round" stroke-width="24">
-        </line>
-        <line x1="60.1" y1="195.9" x2="82.7" y2="173.3" stroke-linecap="round" stroke-linejoin="round"
-            stroke-width="24"></line>
-        <line x1="32" y1="128" x2="64" y2="128" stroke-linecap="round" stroke-linejoin="round" stroke-width="24"></line>
-        <line x1="60.1" y1="60.1" x2="82.7" y2="82.7" stroke-linecap="round" stroke-linejoin="round" stroke-width="24">
-        </line>
-    </svg>
-    <span class="text-2xl font-medium text-green-700">Updating...</span>
-</div>
-         
-          </div>
-            )
-          }
+     
       </div>
     </div>
   );

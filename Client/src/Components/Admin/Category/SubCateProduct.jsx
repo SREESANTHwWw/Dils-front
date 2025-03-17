@@ -321,7 +321,7 @@ const SubCateProduct = () => {
                 >
                    <option value="" >Select Type</option>
                   {unitList.map((e,index)=>(
-                      <option key={index} value={e._id} >{e.unitname}</option>
+                      <option key={index} value={e.unitname} >{e.unitname}</option>
 
                   ))}
                 </select>

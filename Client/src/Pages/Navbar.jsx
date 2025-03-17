@@ -1,4 +1,4 @@
- import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link, Outlet } from "react-router-dom";
 import { HiOutlineShoppingCart } from "react-icons/hi";
 import { CgProfile } from "react-icons/cg";
@@ -137,7 +137,7 @@ const closeThesearch=()=>{
       <MdOutlineMail aria-label="Email Icon" />
       <span className="text-sm">Info@gmail.com</span>
       <FiPhone aria-label="Phone Icon"  />
-      <span className=" text-sm">0002010223</span>
+      <span className=" text-sm">9567641722</span>
     </div>
 
     {/* Right Section */}

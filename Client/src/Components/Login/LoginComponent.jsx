@@ -46,6 +46,7 @@ const LoginComponent = () => {
         password: pass,
       })
       .then((res) => {
+        localStorage.setItem("token", JSON.stringify(res.data.token));
         localStorage.setItem("user_id", JSON.stringify(res.data.user.id));
         setCurrentUser(res.data.user);
         localStorage.setItem("currentUser", JSON.stringify(res.data.user));

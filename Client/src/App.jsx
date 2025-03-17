@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useContext, useEffect, useState } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes ,useNavigate} from "react-router-dom";
 import Navbar from "./Pages/Navbar";
 import Login from "./Pages/Login";
 import SignUp from "./Pages/SignUp";
@@ -28,37 +28,33 @@ import Category from "./Components/Admin/Category/Category";
 import SubCate from "./Components/Admin/Category/SubCate";
 import { Loading } from "./Pages/Loading";
 
-
-import { requestFcmToken,onMessageListener  } from './FirebaseUtils';
+import { requestFcmToken, onMessageListener } from "./FirebaseUtils";
 import axios from "axios";
 import { server } from "./Server";
-
+import {jwtDecode} from "jwt-decode";
 
 const Admin = lazy(() => import("./Components/Admin/Admin"));
-const Products = lazy(()=> import("./Pages/Products"))
+const Products = lazy(() => import("./Pages/Products"));
 const localdata = localStorage.getItem("user_id");
 const userId = localdata ? JSON.parse(localdata) : [];
 
 const App = () => {
   const { isAuthenticated, adminData, currentUser } = useContext(AuthContext);
   const [token, setToken] = useState("");
- 
+
 
   useEffect(() => {
-   const FetchToken = async()=>{
-    try {
-      const fcmtoken = await requestFcmToken()
-      if(fcmtoken){
-        setToken(fcmtoken)
+    const FetchToken = async () => {
+      try {
+        const fcmtoken = await requestFcmToken();
+        if (fcmtoken) {
+          setToken(fcmtoken);
+        }
+      } catch (error) {
+        console.log("geting Token Error", error);
       }
-    } catch (error) {
-      console.log( "geting Token Error", error)
-    }
- 
-   }
-   FetchToken()
-   
-
+    };
+    FetchToken();
   }, []);
 
   useEffect(() => {
@@ -77,18 +73,46 @@ const App = () => {
     }
   }, [token, userId]);
 
-  onMessageListener().then((payload)=>{
-    toast(
-      <div>
-       <strong> {payload.notification.title}</strong>
-       <strong> {payload.notification.body}</strong>
-      </div>
-    )
-    console.log('Message received. ', payload);
+  onMessageListener()
+    .then((payload) => {
+      toast(
+        <div>
+          <strong> {payload.notification.title}</strong>
+          <strong> {payload.notification.body}</strong>
+        </div>
+      );
+      console.log("Message received. ", payload);
+    })
+    .catch((err) => {
+      console.log("Error occured", err);
+    });
+    useEffect(() => {
+      checkTokenExpiry(); // Auto-check token expiry on page load
+    }, []);
+    const checkTokenExpiry = () => {
+      const token = localStorage.getItem("token");
+      if (!token) return false; // No token found
+    
+      try {
+        const decoded = jwtDecode(token);
+        if (decoded.exp * 1000 < Date.now()) {
+          console.log("Token expired, logging out...");
+   
+          return false;
+        }
+        return true;
+      } catch (error) {
+        console.error("Invalid token:", error);
+        logoutUser(); // If decoding fails, log out
+        return false;
+      }
+    };
+    
+    const logoutUser = () => {
+      localStorage.removeItem("token"); // Remove token from storage
+      window.location.href = "/login"; // Redirect to login page
+    };
 
-  })
-  .catch((err)=>{ console.log('Error occured', err)})   
-  
   return (
     <div>
       <AuthContextProvider>
@@ -97,22 +121,20 @@ const App = () => {
             <ProductsContextProvider>
               <BrowserRouter>
                 <Routes>
-                  <Route path="/login" element={
-                    
-                    <LoginRe />} 
-                    />
+                  <Route path="/login" element={<LoginRe />} />
                   <Route path="/signup" element={<SignUp />} />
                   {/* Public Routes */}
                   <Route path="/" element={<Navbar />}>
                     <Route index element={<Home />} />
 
-                    <Route path="/products" element={
-                      <Suspense fallback={<Loading/>}>
- <Products />
-                      </Suspense>
-                     
-                      
-                      } />
+                    <Route
+                      path="/products"
+                      element={
+                        <Suspense fallback={<Loading />}>
+                          <Products />
+                        </Suspense>
+                      }
+                    />
                     <Route path="/viewproduct/:id" element={<ViewProduct />} />
                   </Route>
 

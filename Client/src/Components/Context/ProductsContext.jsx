@@ -84,6 +84,7 @@ const ProductsContextProvider = (props) => {
     const price = product.price;
     const description = product.description;
     const mRP = product.mRP;
+    const unitid = product.unitid;
 
 
  
@@ -96,6 +97,7 @@ const ProductsContextProvider = (props) => {
         product_img,
         premium_price,
         medium_price,
+        unitid,
         price,
         description,
         mRP,
@@ -124,7 +126,6 @@ const ProductsContextProvider = (props) => {
         setCartlength(res.data.cart.items)
 
     })
-  
 
   }}
   useEffect(() => {

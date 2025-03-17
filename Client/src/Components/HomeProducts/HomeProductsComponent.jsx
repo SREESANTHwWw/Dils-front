@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ProductsContext } from "../Context/ProductsContext";
 import { AuthContext } from "../Context/AuthContext";
+import {jwtDecode} from "jwt-decode";
 
 const HomeProductsComponent = () => {
   const navigate = useNavigate();
@@ -18,10 +19,26 @@ const HomeProductsComponent = () => {
   const { currentUser } = useContext(AuthContext);
 
   // Navigate to the Products page
+  const token = localStorage.getItem("token");
 
-
-  // Function to render price based on user type
-
+  if (token) {
+      try {
+          const decoded = jwtDecode(token);
+          const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+  
+          if (decoded.exp && decoded.exp < currentTime) {
+              console.warn("Token has expired!");
+              // Handle expired token (e.g., logout user)
+          } else {
+              console.log("Token is valid");
+          }
+      } catch (error) {
+          console.error("Invalid token:", error.message);
+      }
+  } else {
+      console.error("Token not found");
+  }
+  
   
   const renderPrice = (product) => {
     if (!currentUser) return null; // Don't show prices if no user is logged in

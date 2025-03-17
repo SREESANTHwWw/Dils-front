@@ -71,6 +71,7 @@ const [editCategoryId, setEditCategoryId] = useState(null);
         if (res.data.msg === "success") {
           const addedCategory = res.data.category; // Assuming the response returns the added category
           setCurrentData((prevData) => [addedCategory, ...prevData]);
+          
           toast.success("Category created successfully", { theme: "colored" });
           setAddCategoryOpen(false);
           setCategoryName("");

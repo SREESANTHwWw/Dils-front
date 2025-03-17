@@ -42,7 +42,7 @@ const SignUpComponent = () => {
   const [validmsg, setValidmsg] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Submit Handler
+  // Submit Handler 
   const handleSubmit = async (e) => {
     e.preventDefault();
 

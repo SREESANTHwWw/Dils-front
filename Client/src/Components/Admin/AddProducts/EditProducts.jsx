@@ -4,6 +4,7 @@ import { server } from "../../../Server";
 import { toast } from "react-toastify";
 import { ProductsContext } from "../../Context/ProductsContext";
 import { IoSearch } from "react-icons/io5";
+import { FaEdit, FaTrash } from "react-icons/fa"
 
 const EditProducts = () => {
   const {     filterData, 
@@ -31,6 +32,7 @@ const EditProducts = () => {
        const [isActive, setActive] = useState(false);
        const [mRP, setMRP] = useState("");
   const [updateProductId ,setUpdateProductID] = useState("")
+   const [unitList, setUnitList] = useState([]);
 
 
   
@@ -105,6 +107,12 @@ const EditProducts = () => {
 
 
   }
+  useEffect(() => {
+    axios
+      .get(`${server}/getunit`)
+      .then((res) => setUnitList(res.data.getUnit))
+      .catch((err) => console.error("Error fetching units:", err));
+  }, []);
 
 
   const handlePrev = () => {
@@ -129,7 +137,10 @@ const EditProducts = () => {
 
     }else{
       const filteringProduct = filterData.filter((product)=>
-        product.productname.toLowerCase().includes(searchQuery)
+        product.productname.toLowerCase().includes(searchQuery)||
+        product.description.toLowerCase().includes(searchQuery)||
+      
+        product.unitid.toLowerCase().includes(searchQuery)
         
       )
       setProductFilter(filteringProduct)
@@ -193,22 +204,24 @@ const EditProducts = () => {
                  
                   <td className="p-2 border">{product.fast_moving}</td>
                   <td className="p-2 border">{product.mRP}</td>
-                 
-                  <div className="w-[150px] flex-col flex justify-center gap-5 items-center ">
+                 <td>
+                  <div className="w-[150px]  flex justify-center gap-5 items-center ">
                     <button
-                      className="bg-green-600 w-[70px] h-[30px] rounded-md text-white font-bold hover:bg-green-950"
+                      className="px-3 py-1 text-white bg-yellow-500 rounded hover:bg-yellow-600 transition-colors flex items-center gap-1"
                       onClick={() => openEditBox(product)}
                     >
-                      Edit
+                      <FaEdit />
                     </button>
+            
                     <button
-                      className="bg-red-600 w-[70px] h-[30px] rounded-md text-white font-bold hover:bg-red-950"
+                      className="px-3 py-1 text-white bg-red-600 rounded hover:bg-red-700 transition-colors flex items-center gap-1"
                       onClick={() => deleteProduct(product._id)}
                     >
                       {" "}
-                      Delete
+                     <FaTrash/>
                     </button>
                   </div>
+                  </td>
                 </tr>
               ))
             ) : (
@@ -272,13 +285,10 @@ const EditProducts = () => {
                   className="w-full p-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 hover:border-blue-400 transition"
                 >
                   <option value="" disabled>Select Type</option>
-                  <option value="MTR">MTR</option>
-                  <option value="SETT">SETT</option>
-                  <option value="LTR">LTR</option>
-                  <option value="ROll">ROll</option>
-                  <option value="No">No</option>
-                  <option value="KG">KG</option>
-                  <option value="No unit">None of the above</option>
+                  {unitList.map((e,index)=>(
+                      <option key={index} value={e.unitname} >{e.unitname}</option>
+
+                  ))}
                 </select>
               </div>
             <input
