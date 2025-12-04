@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 
 const CarouselPage = () => {
   const slides = [
-    { imgSrc: "/banner3.jpg", imgAlt: "" },
-    { imgSrc: "/obanner2.jpg", imgAlt: "rewind" },
+    { imgSrc: "/ecom2.jpg", imgAlt: "" },
+    { imgSrc: "/ecom1.jpg", imgAlt: "rewind" },
     {
-      imgSrc: "/banner1.jpg",
+      imgSrc: "/ecom3.jpg",
       imgAlt:
         "Vibrant abstract painting with swirling blue and purple hues on a canvas.",
     },

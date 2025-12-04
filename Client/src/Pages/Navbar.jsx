@@ -131,8 +131,8 @@ const closeThesearch=()=>{
       >
         {/* Top Scrolling Announcement */}
         <div className="w-full h-[2rem] bg-gradient-to-r from-blue-900  to-blue-800 text-white flex justify-center items-center">
-  <div className="w-full max-w-7xl mx-auto flex justify-between items-center px-4">
-    {/* Left Section */}
+  {/* <div className="w-full max-w-7xl mx-auto flex justify-between items-center px-4">
+    
     <div className="flex items-center space-x-4">
       <MdOutlineMail aria-label="Email Icon" />
       <span className="text-sm">Info@gmail.com</span>
@@ -140,13 +140,13 @@ const closeThesearch=()=>{
       <span className=" text-sm">9567641722</span>
     </div>
 
-    {/* Right Section */}
+
     <div className="flex items-center space-x-4">
       <FaFacebookSquare aria-label="Facebook Icon" />
       <FaInstagramSquare aria-label="Instagram Icon" />
       <FaYoutube aria-label="YouTube Icon" />
     </div>
-  </div>
+  </div> */}
 </div>
 
 
@@ -154,14 +154,18 @@ const closeThesearch=()=>{
         <div className="w-full flex flex-col sm:flex-row items-center justify-between py-4 px-6 bg-white shadow-md relative">
           {/* Left Section */}
           <div className="flex items-center gap-4 w-full justify-between sm:w-[70%]">
-            {/* <img
-              className="h-10 w-10"
+            <div className="h-16 flex items-center ">
+                <img
+              className="h-32 w-32 object-cover cursor-pointer "
               src={
-                "https://res.cloudinary.com/dkz8fh4jt/image/upload/v1736509842/e3fkw0uklsogg4hyknjn.png"
+                "/logodils.png"
               }
               alt="Logo"
-            /> */}
-            <span className="font-bold text-blue-800 text-[30px] font-mono tracking-tighter hover:text-yellow-600"> Dils Trades</span>
+            />
+
+            </div>
+          
+          
 
             {/* Search Bar and Category Dropdown */}
             {responsive === true ? (
@@ -194,7 +198,7 @@ const closeThesearch=()=>{
                 {/* Search Bar */}
                 <div className="relative w-full sm:w-[600px]">
                   <input
-                    className="w-full h-[50px] pl-3 pr-14 outline-none shadow-lg [&::-webkit-search-cancel-button]:appearance-none"
+                    className="w-full h-[50px] pl-3 pr-14 outline-none  [&::-webkit-search-cancel-button]:appearance-none"
                     type="search"
                     placeholder="Search...."
                     value={searchData}

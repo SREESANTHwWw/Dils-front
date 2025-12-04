@@ -22,6 +22,8 @@ const HomeComponent = () => {
         
         <LoopProduct/>
         <FeatureBar/>
+        
+             <HomeProduct />
         <div className="w-full  bg-blue-950">
           <Footer />
         </div>

@@ -98,7 +98,7 @@ const HomeProductsComponent = () => {
   };
 
   return (
-    <div className="w-full flex justify-center items-center bg-gray-50 py-10">
+    <div className="w-full flex justify-center items-center bg-gray-50 py-10 p-4">
       <div className="w-full max-w-7xl flex flex-col items-center px-6 lg:px-0">
         {/* Header Section */}
         <div className="w-full flex justify-between items-center mb-8">
