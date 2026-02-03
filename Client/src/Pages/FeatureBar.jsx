@@ -1,45 +1,62 @@
 import React from "react";
-import { FaHeadset, FaCreditCard, FaShieldAlt, FaTruck, FaUndo } from "react-icons/fa";
+import { motion } from "framer-motion";
+import { Headphones, ShieldCheck, Truck, RotateCcw } from "lucide-react";
 
 const FeatureBar = () => {
   const features = [
     {
-      icon: <FaHeadset className="text-blue-500 text-2xl" />,
-      title: "24/7 SUPPORT",
-      description: "Support every time",
-    },
- 
-    {
-      icon: <FaShieldAlt className="text-blue-500 text-2xl" />,
-      title: "SECURED PAYMENT",
-      description: "100% secured",
+      icon: <Headphones className="text-blue-600" size={32} />,
+      title: "24/7 Support",
+      description: "Dedicated assistance",
+      color: "bg-blue-50",
     },
     {
-      icon: <FaTruck className="text-blue-500 text-2xl" />,
-      title: "FREE SHIPPING",
-      description: "Order over ₹100",
+      icon: <ShieldCheck className="text-emerald-600" size={32} />,
+      title: "Secure Payment",
+      description: "Encrypted transactions",
+      color: "bg-emerald-50",
     },
     {
-      icon: <FaUndo className="text-blue-500 text-2xl" />,
-      title: "30 DAYS RETURN",
-      description: "30 days guarantee",
+      icon: <Truck className="text-indigo-600" size={32} />,
+      title: "Free Shipping",
+      description: "On orders over ₹999",
+      color: "bg-indigo-50",
+    },
+    {
+      icon: <RotateCcw className="text-rose-600" size={32} />,
+      title: "Easy Returns",
+      description: "30-day money back",
+      color: "bg-rose-50",
     },
   ];
 
   return (
-    <div className="w-full bg-white shadow-md py-6">
-      <div className="max-w-7xl mx-auto flex flex-wrap  justify-between items-center">
+    <div className="w-full bg-slate-50/50 py-12 px-4 border-y border-slate-100">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {features.map((feature, index) => (
-          <div
+          <motion.div
             key={index}
-            className="grid grid-cols-1 sm:grid-cols-2 justify-center gap-4 p-4 border-r last:border-r-0 border-gray-200"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.1 }}
+            whileHover={{ y: -5 }}
+            className="flex items-center gap-5 p-6 bg-white rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300"
           >
-            {feature.icon}
-            <div>
-              <p className="font-semibold text-gray-800">{feature.title}</p>
-              <p className="text-sm text-gray-500">{feature.description}</p>
+            {/* Icon Container with dynamic background */}
+            <div className={`p-4 rounded-xl ${feature.color} shrink-0`}>
+              {feature.icon}
             </div>
-          </div>
+
+            <div>
+              <h4 className="font-bold text-slate-800 text-sm md:text-base leading-tight">
+                {feature.title}
+              </h4>
+              <p className="text-xs text-slate-500 mt-1 font-medium">
+                {feature.description}
+              </p>
+            </div>
+          </motion.div>
         ))}
       </div>
     </div>

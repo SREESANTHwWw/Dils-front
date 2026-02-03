@@ -1,38 +1,42 @@
 import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
-import { HiOutlineShoppingCart } from "react-icons/hi";
-import { Link, useNavigate } from "react-router-dom";
+import { HiOutlineShoppingCart, HiOutlineLocationMarker, HiOutlineCash } from "react-icons/hi";
+import { IoArrowBackOutline, IoShieldCheckmarkOutline } from "react-icons/io5";
+import { FaCheck, FaTrash, FaPlus } from "react-icons/fa";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { jwtDecode } from "jwt-decode";
+import { toast } from "react-toastify";
 import { server } from "../../Server";
 import { ProductsContext } from "../Context/ProductsContext";
-import { toast } from "react-toastify";
-import { useLocation } from "react-router-dom";
-import theme from "@material-tailwind/react/theme";
-import { FaCheck, FaTrash, FaPlus } from "react-icons/fa";
-import { jwtDecode } from "jwt-decode";
+
 const CheckOutComponent = () => {
-  const [address, setAddress] = useState([]);
   const location = useLocation();
-  const { price,medium,premium, product } = location.state || {};
+  const navigate = useNavigate();
+  const { price, medium, premium, product } = location.state || {};
+  const { formatPrice, cartlength } = useContext(ProductsContext);
+
+  const [address, setAddress] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
-  const [ cart, setCart] = useState([]);
+  const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
-  const { formatPrice ,cartlength} = useContext(ProductsContext);
   const [addAddress, setAddAddress] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState([]); // Track selected address
-  const navigate = useNavigate();
+  const [selectedAddress, setSelectedAddress] = useState(null);
+
+  // Address Form States
   const [fullname, setFullname] = useState("");
   const [Pincode, setPincode] = useState("");
   const [city, setCity] = useState("");
   const [phonenumber, setPhonenumber] = useState("");
   const [landmark, setLandmark] = useState("");
   const [state, setState] = useState("");
+
   const localdata = localStorage.getItem("user_id");
   const userId = localdata ? JSON.parse(localdata) : null;
   const token = localStorage.getItem("token");
-  const tokedata = jwtDecode(token)
+  const tokedata = token ? jwtDecode(token) : null;
 
-  // Fetch cart details
   useEffect(() => {
     const fetchCartDetails = async () => {
       try {
@@ -40,352 +44,273 @@ const CheckOutComponent = () => {
         setCart(res.data.cart.items);
         setSubtotal(res.data.cart.subtotal);
       } catch (error) {
-        console.error("Failed to fetch cart details:", error);
+        console.error("Cart fetch failed:", error);
       }
     };
-  
-    // Check for price, medium, or premium and update state
+
     if (price || medium || premium) {
-      const selectedPrice = price || medium || premium; // Pick the first valid price
-      setSubtotal(selectedPrice);
+      setSubtotal(price || medium || premium);
       setCart([product]);
     } else {
-      // Fetch cart details if no price is provided
       fetchCartDetails();
     }
-  }, [price, medium, premium, product, server, userId]); // Dependencies
-  
+  }, [price, medium, premium, product, userId]);
 
-  // Fetch saved addresses
   useEffect(() => {
     if (userId) {
-      axios.get(`${server}/getAddress/${userId}`).then((res) => {
-        setAddress(res.data);
-      });
+      axios.get(`${server}/getAddress/${userId}`).then((res) => setAddress(res.data));
     }
   }, [userId]);
 
-  console.log(cart)
-  // Order placement function
   const ordering = () => {
-
-    if (!selectedAddress || Object.keys(selectedAddress).length === 0) {
+    if (!selectedAddress) {
       toast.warning("Please select a shipping address.", { theme: "colored" });
       return;
     }
+    setLoading(true);
+    
     const orderDetails = cart.map((item) => ({
       product_img: item.product_img,
       productname: item.productname,
       price: item.price,
       unitid: item.unitid,
       minimum_order_quantity: item.minimum_order_quantity,
-      address: selectedAddress, 
-    }))
+    }));
 
     const userinfo = [{
-      shopname:tokedata.shopname,
-      username :tokedata.username,
-      phonenumber :tokedata.phonenumber
-  }]
-  
-   
-    
-    setLoading(true);
-    axios
-      .post(`${server}/create-order`, {
-        userId,
-        orderDetails,
-        address: selectedAddress,
-       userinfo,
-        subtotal,
-        paymentMethod,
-      })
-      .then((res) => {
-        console.log("Order Created:", res.data);
-        toast.success("Order successfully placed!",{theme:"colored"});
-        navigate("/");
-      })
-      .catch((error) => {
-        console.error("Order creation failed:", error);
-        toast.error("Failed to place order. Please try again later.",{theme:"colored"});
-      })
-      .finally(() => setLoading(false));
+      shopname: tokedata?.shopname,
+      username: tokedata?.username,
+      phonenumber: tokedata?.phonenumber
+    }];
+
+    axios.post(`${server}/create-order`, {
+      userId,
+      orderDetails,
+      address: selectedAddress,
+      userinfo,
+      subtotal,
+      paymentMethod,
+    })
+    .then(() => {
+      toast.success("Order placed successfully!", { theme: "colored" });
+      navigate("/");
+    })
+    .catch(() => toast.error("Failed to place order."))
+    .finally(() => setLoading(false));
   };
 
-  // Handle adding new address
   const handleAddress = () => {
-    axios
-      .post(`${server}/add-address`, {
-        userId,
-        fullname,
-        Pincode,
-        city,
-        phonenumber,
-        landmark,
-        state,
-      })
-      .then((res) => { 
-       
+    axios.post(`${server}/add-address`, { userId, fullname, Pincode, city, phonenumber, landmark, state })
+      .then(() => {
         toast.success("Address added");
-        axios.get(`${server}/getAddress/${userId}`).then((response) => {
-          setAddress(response.data);  // Update the address state with the latest data
-        });
+        axios.get(`${server}/getAddress/${userId}`).then((res) => setAddress(res.data));
         setAddAddress(false);
-        setFullname("");
-        setPhonenumber("");
-        setCity("");
-        setPincode("");
-        setLandmark("");
-        setState("");
-      })
-      .catch((err) => {
-        toast.error("Invalid credentials");
+        // Clear fields
+        setFullname(""); setPhonenumber(""); setCity(""); setPincode(""); setLandmark(""); setState("");
       });
   };
+
   const handleDeleteAddress = (id) => {
-    // Confirm if the user really wants to delete the address
-    if (window.confirm("Are you sure you want to delete this address?")) {
-      setLoading(true); // Optional: Show loading indicator while waiting for the request
-  
-      // Send the DELETE request to the server
-      axios
-        .delete(`${server}/delete-address/${userId}/${id}`)
-        .then((res) => {
-          toast.success("Address deleted successfully!");
-  
-          // Optionally: Update the address list or state here if necessary
-          // For example, you could filter the deleted address from the list:
-          setAddress((prevAddresses) => prevAddresses.filter((address) => address._id !== id));
-  
-          setLoading(false); // Hide loading indicator after request
-        })
-        .catch((err) => {
-          toast.error("Failed to delete address. Please try again.");
-          setLoading(false); // Hide loading indicator if there's an error
-        });
+    if (window.confirm("Delete this address?")) {
+      axios.delete(`${server}/delete-address/${userId}/${id}`).then(() => {
+        setAddress(address.filter(a => a._id !== id));
+        toast.success("Address removed");
+      });
     }
   };
-  
 
   return (
-    <div className="flex flex-col min-h-screen items-center bg-gray-100">
-      {/* Header */}
-      <div className="flex justify-between items-center w-[100%] bg-blue-950 h-[80px] px-6  shadow-md">
-        <span className="text-white text-xl font-semibold">Dils Trades</span>
-        <span className="text-white text-lg font-medium">Checkout</span>
-        <div className="flex flex-col items-center gap-1 relative">
-                 <Link to="/cart" className="relative">
-                   <HiOutlineShoppingCart className="text-3xl text-white hover:text-yellow-500 transition duration-300" />
-                   {cartlength.length > 0 && (
-                     <span className="absolute top-[-8px] right-[-10px] bg-red-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                       {cartlength.length}
-                     </span>
-                   )}
-                 </Link>
-             
-               </div>
-      </div>
-
-      {/* Loading Indicator */}
-      {loading && <div className="text-blue-600 mt-4 ">
-        <img class="w-20 h-20 animate-spin" src="https://www.svgrepo.com/show/199956/loading-loader.svg" alt="Loading icon"/>
-        </div>}
-      
-
-      {/* Address Section */}
-      {Array.isArray(address) && address.length > 0 ? (
-  <div className="w-[75%] mt-8 bg-white p-6 rounded-lg shadow-md">
-    <h2 className="text-lg font-semibold mb-4 text-gray-800">Shipping Address</h2>
-    {address.map((e, index) => (
-      <div key={index} className="border-t border-gray-200 pt-4 flex justify-between items-center">
-        <div className="flex-1">
-          <div className="text-gray-800 font-semibold">{e.fullname}</div>
-          <div className="text-gray-600">{e.phonenumber}</div>
-          <div className="text-gray-600">{e.landmark}</div>
-          <div className="text-gray-600">{e.Pincode}</div>
-          <div className="text-gray-600">{e.city}, {e.state}</div>
+    <div className="min-h-screen bg-slate-50 pb-20">
+      {/* Premium Header */}
+      <div className="bg-white border-b sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+            <IoArrowBackOutline size={24} className="text-slate-600" />
+          </button>
+          <div className="text-center">
+            <h1 className="text-lg font-bold text-slate-900 tracking-tight">Checkout</h1>
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Secure Checkout</p>
+          </div>
+          <Link to="/cart" className="relative p-2">
+            <HiOutlineShoppingCart size={26} className="text-slate-600" />
+            {cartlength?.length > 0 && (
+              <span className="absolute top-1 right-1 bg-blue-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+                {cartlength.length}
+              </span>
+            )}
+          </Link>
         </div>
-        
-        
-
-<div className="flex flex-col  gap-3">
-  {/* Select Button */}
-  <button
-    onClick={() => setSelectedAddress(e)} // Set selected address
-    className={`border px-4 py-2 rounded-md hover:bg-blue-600 hover:text-white transition flex items-center justify-center ${
-      selectedAddress === e ? 'bg-blue-600 text-white' : 'text-blue-600'
-    }`}
-  >
-    <FaCheck />
-  </button>
-
-  {/* Delete Button */}
-  <button
-    onClick={() => handleDeleteAddress(e._id)} // Assuming 'e._id' is the address ID for deletion
-    className="border px-4 py-2 rounded-md hover:bg-red-600 hover:text-white transition flex items-center justify-center text-red-600"
-  >
-    <FaTrash />
-  </button>
-
-  {/* Add Address Button */}
-  <button
-    onClick={() => setAddAddress(true)}
-    className="border px-4 py-2 rounded-md hover:bg-blue-900 hover:text-white transition flex items-center justify-center text-blue-600"
-  >
-    <FaPlus />
-  </button>
-</div>
-
-
       </div>
-    ))}
-  </div>
-) : (
-  <div className="w-[75%] mt-8 bg-white p-6 rounded-lg shadow-md">
-    <h2 className="text-lg font-semibold mb-4 text-gray-800">Shipping Address</h2>
-    <button
-      onClick={() => setAddAddress(true)}
-      className="text-blue-600 hover:underline"
-    >
-      Add Address
-    </button>
-  </div>
-)}
 
-      {/* Address Modal */}
-      {addAddress && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-xl w-[90%] max-w-2xl">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Add Address</h2>
+      <div className="max-w-7xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column: Address & Payment */}
+        <div className="lg:col-span-2 space-y-6">
+          
+          {/* Address Card */}
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="p-6 border-b border-slate-50 flex justify-between items-center">
+              <h2 className="text-md font-bold text-slate-800 flex items-center gap-2">
+                <HiOutlineLocationMarker className="text-blue-600" size={20} /> Shipping Address
+              </h2>
+              <button onClick={() => setAddAddress(true)} className="text-xs font-bold text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1">
+                <FaPlus size={10} /> Add New
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              {address.length > 0 ? (
+                address.map((e, index) => (
+                  <motion.div 
+                    key={index}
+                    whileHover={{ scale: 1.005 }}
+                    onClick={() => setSelectedAddress(e)}
+                    className={`relative p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+                      selectedAddress?._id === e._id ? 'border-blue-600 bg-blue-50/30' : 'border-slate-100 bg-slate-50/50 hover:border-slate-200'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-800">{e.fullname}</span>
+                          {selectedAddress?._id === e._id && <span className="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full">Selected</span>}
+                        </div>
+                        <p className="text-sm text-slate-500 mt-1">{e.phonenumber}</p>
+                        <p className="text-sm text-slate-600 mt-2 leading-relaxed">
+                          {e.landmark}, {e.city}, {e.state} - <span className="font-bold">{e.Pincode}</span>
+                        </p>
+                      </div>
+                      <button 
+                        onClick={(ev) => { ev.stopPropagation(); handleDeleteAddress(e._id); }}
+                        className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                      >
+                        <FaTrash size={14} />
+                      </button>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="text-center py-10 border-2 border-dashed border-slate-100 rounded-3xl">
+                  <p className="text-slate-400 text-sm">No saved addresses found.</p>
+                </div>
+              )}
+            </div>
+          </div>
 
-            {/* Form Fields */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label className="block text-gray-700 mb-1">Full Name</label>
-                <input
-                  type="text"
-                  placeholder="Full Name"
-                  value={fullname}
-                  className="w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onChange={(e)=>setFullname(e.target.value)}
-                />
+          {/* Payment Method Card */}
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
+            <h2 className="text-md font-bold text-slate-800 flex items-center gap-2 mb-6">
+              <HiOutlineCash className="text-blue-600" size={20} /> Payment Method
+            </h2>
+            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <input 
+                type="radio" 
+                checked={paymentMethod === "Cash on Delivery"} 
+                className="w-5 h-5 accent-blue-600" 
+                readOnly
+              />
+              <div className="flex-1">
+                <p className="text-sm font-bold text-slate-800">Cash on Delivery</p>
+                <p className="text-xs text-slate-500">Pay when you receive your order</p>
               </div>
+              <HiOutlineCash size={24} className="text-slate-400" />
+            </div>
+          </div>
+        </div>
 
-              <div>
-                <label className="block text-gray-700 mb-1">Phone Number</label>
-                <input
-                  type="number"
-                  placeholder="PhoneNumber"
-                  value={phonenumber}
-                  className="w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onChange={(e)=>setPhonenumber(e.target.value)}
-                />
+        {/* Right Column: Order Summary */}
+        <div className="lg:col-span-1">
+          <div className="bg-blue-950 rounded-[2.5rem] p-8 text-white sticky top-28 shadow-xl shadow-blue-900/20">
+            <h2 className="text-xl font-bold mb-6">Order Summary</h2>
+            
+            <div className="space-y-4 mb-8 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+              {cart.map((item, idx) => (
+                <div key={idx} className="flex gap-4 items-center">
+                  <img src={item.product_img} className="w-14 h-14 rounded-xl object-cover bg-white/10" alt="" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold truncate">{item.productname}</p>
+                    <p className="text-xs text-blue-200">Qty: {item.minimum_order_quantity || 1}</p>
+                  </div>
+                  <p className="text-sm font-bold">{formatPrice(item.price)}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-white/10 pt-6 space-y-3">
+              <div className="flex justify-between text-blue-200 text-sm font-medium">
+                <span>Subtotal</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
-
-              <div>
-                <label className="block text-gray-700 mb-1">Pincode</label>
-                <input
-                  type="number"
-                  value={Pincode}
-                  placeholder="Pincode"
-                  className="w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onChange={(e)=>setPincode(e.target.value)}
-                />
+              <div className="flex justify-between text-blue-200 text-sm font-medium">
+                <span>Shipping</span>
+                <span className="text-green-400">Free</span>
               </div>
-
-              <div>
-                <label className="block text-gray-700 mb-1">Landmark</label>
-                <input
-                  type="text"
-                  value={landmark}
-                  placeholder="Near park or mall"
-                  className="w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onChange={(e)=>setLandmark(e.target.value)}
-                />
+              <div className="flex justify-between text-xl font-bold mt-4 pt-4 border-t border-white/10">
+                <span>Total</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-gray-700 mb-1">City</label>
-                <input
-                  type="text"
-                  value={city}
-                  placeholder="City"
-                  className="w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onChange={(e)=>setCity(e.target.value)}
-                />
-              </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={ordering}
+              disabled={loading}
+              className="w-full mt-8 h-14 bg-yellow-500 hover:bg-yellow-400 text-blue-950 font-black rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2"
+            >
+              {loading ? "Processing..." : "Place Order Now"}
+            </motion.button>
+            
+            <div className="mt-6 flex items-center justify-center gap-2 text-blue-300 text-[10px] font-bold uppercase tracking-widest">
+              <IoShieldCheckmarkOutline size={16} /> 100% Secure Transaction
+            </div>
+          </div>
+        </div>
+      </div>
 
-              <div>
-                <label className="block text-gray-700 mb-1">State</label>
-                <select
-                  className="w-full border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onChange={(e)=>setState(e.target.value)}
-                  value={state}
-                >
-                  <option value="" disabled>
-                    Choose a state
-                  </option>
+      {/* Modern Address Modal */}
+      <AnimatePresence>
+        {addAddress && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setAddAddress(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+              className="relative bg-white w-full max-w-xl rounded-[2.5rem] p-8 md:p-12 shadow-2xl"
+            >
+              <h2 className="text-2xl font-bold text-slate-900 mb-8">Add New Address</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input placeholder="Full Name" value={fullname} onChange={(e)=>setFullname(e.target.value)} className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl text-sm" />
+                <input placeholder="Phone" value={phonenumber} onChange={(e)=>setPhonenumber(e.target.value)} className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl text-sm" />
+                <input placeholder="Pincode" value={Pincode} onChange={(e)=>setPincode(e.target.value)} className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl text-sm" />
+                <input placeholder="Landmark" value={landmark} onChange={(e)=>setLandmark(e.target.value)} className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl text-sm" />
+                <input placeholder="City" value={city} onChange={(e)=>setCity(e.target.value)} className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl text-sm" />
+                <select value={state} onChange={(e)=>setState(e.target.value)} className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl text-sm font-medium text-slate-500">
+                  <option value="">Select State</option>
                   <option value="kerala">Kerala</option>
                   <option value="tamilnadu">Tamil Nadu</option>
                 </select>
               </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex justify-end mt-6 gap-4">
-              <button
-                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition"
-                onClick={() => setAddAddress(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-                onClick={handleAddress}
-              >
-                Save Address
-              </button>
-            </div>
+              <div className="flex gap-4 mt-10">
+                <button onClick={() => setAddAddress(false)} className="flex-1 h-12 rounded-xl font-bold text-slate-500 bg-slate-100">Cancel</button>
+                <button onClick={handleAddress} className="flex-1 h-12 rounded-xl font-bold text-white bg-blue-600 shadow-lg shadow-blue-600/20">Save Address</button>
+              </div>
+            </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 z-[200] bg-white/60 backdrop-blur-md flex flex-col items-center justify-center">
+          <div className="w-16 h-16 border-4 border-slate-100 border-t-blue-600 rounded-full animate-spin"></div>
+          <p className="mt-4 font-bold text-slate-800 tracking-tight">Processing Order...</p>
         </div>
       )}
-      {/* Payment Method */}
-      <div className="w-[75%] mt-6 bg-white p-6 rounded-lg shadow-md">
-        
-        <div className="flex flex-col gap-2">
-       {/* Payment Method */}
-
-  <h2 className="text-lg font-semibold mb-4 text-gray-800">Payment Method</h2>
-  <p className="text-gray-600 mb-4">Subtotal: {formatPrice(subtotal)}</p>
-  <div className="flex flex-col gap-2">
-    
-    <label>
-      <input
-        type="radio"
-        name="payment"
-        value="Cash on Delivery"
-        defaultChecked
-        onChange={(e) => setPaymentMethod(e.target.value)}
-      />
-      Cash on Delivery
-    </label>
-  </div>
-
-
-        </div>
-      </div>
-
-      {/* Place Order Button */}
-      <div className="w-[75%] mt-8 mb-4 flex justify-end">
-        <button
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md"
-          onClick={ordering}
-        >
-          Place Order
-        </button>
-      </div>
     </div>
   );
 };
 
-export default CheckOutComponent;  
+export default CheckOutComponent;

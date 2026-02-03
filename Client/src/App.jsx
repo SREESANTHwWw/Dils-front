@@ -1,182 +1,187 @@
 import React, { lazy, Suspense, useContext, useEffect, useState } from "react";
-import { BrowserRouter, Navigate, Route, Routes ,useNavigate} from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+
+// Components & Pages
 import Navbar from "./Pages/Navbar";
-import Login from "./Pages/Login";
+import LoginRe from "./Components/LoginRe";
 import SignUp from "./Pages/SignUp";
-import CategoryComponent from "./Components/Category/CategoryComponent";
 import Cart from "./Pages/Cart";
 import Profile from "./Pages/Profile";
 import ProfileEdit from "./Pages/ProfileEdit";
 import Home from "./Pages/Home";
-// import Products from "./Pages/Products";
-import ProductsContextProvider from "./Components/Context/ProductsContext";
-import CategoryContextProvider from "./Components/Context/CategoryContext";
-import SignupvalContextProvider from "./Components/Context/SignupInputValContext";
-import { toast, ToastContainer, Zoom } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import AuthContextProvider, {
-  AuthContext,
-} from "./Components/Context/AuthContext";
-// import Admin from "./Components/Admin/Admin";
-import AllUsers from "./Components/Admin/Users/AllUsers";
-import ProtectedRoute from "./Components/ProtectedRoute";
 import CheckoutPage from "./Pages/CheckoutPage";
-import LoginRe from "./Components/LoginRe";
 import ViewProduct from "./Components/ViewOneProduct/ViewProduct";
-import CategoryTable from "./Components/Admin/Category/Category";
+import AllUsers from "./Components/Admin/Users/AllUsers";
 import Category from "./Components/Admin/Category/Category";
-import SubCate from "./Components/Admin/Category/SubCate";
+import ProtectedRoute from "./Components/ProtectedRoute";
 import { Loading } from "./Pages/Loading";
 
+// Context Providers
+import AuthContextProvider from "./Components/Context/AuthContext";
+import CategoryContextProvider from "./Components/Context/CategoryContext";
+import SignupvalContextProvider from "./Components/Context/SignupInputValContext";
+import ProductsContextProvider from "./Components/Context/ProductsContext";
+
+// Utilities
+import { toast, ToastContainer, Zoom } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { requestFcmToken, onMessageListener } from "./FirebaseUtils";
 import axios from "axios";
 import { server } from "./Server";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const Admin = lazy(() => import("./Components/Admin/Admin"));
 const Products = lazy(() => import("./Pages/Products"));
-const localdata = localStorage.getItem("user_id");
-const userId = localdata ? JSON.parse(localdata) : [];
 
 const App = () => {
-  const { isAuthenticated, adminData, currentUser } = useContext(AuthContext);
-  const [token, setToken] = useState("");
+  const [fcmToken, setFcmToken] = useState("");
+  const [isServerLive, setIsServerLive] = useState(false);
+  const [checkingServer, setCheckingServer] = useState(true);
 
-
+  // 1. Server Health Check (For Free Hosting spin-up)
   useEffect(() => {
-    const FetchToken = async () => {
+    const wakeServer = async () => {
       try {
-        const fcmtoken = await requestFcmToken();
-        if (fcmtoken) {
-          setToken(fcmtoken);
-        }
+        // Replace '/health' with any simple GET route you have (like your products fetch)
+        await axios.get(`${server}/get-all-products`); 
+        setIsServerLive(true);
       } catch (error) {
-        console.log("geting Token Error", error);
+        console.error("Server is waking up...");
+      } finally {
+        setCheckingServer(false);
       }
     };
-    FetchToken();
+    wakeServer();
   }, []);
 
+  // 2. Handle FCM Token Retrieval
   useEffect(() => {
-    if (token && userId) {
-      axios
-        .post(`${server}/save-fcm-token`, {
-          token,
-          userId,
-        })
-        .then((res) => {
-          console.log("Token Saved", res);
-        })
-        .catch((err) => {
-          console.log("Error Saving Token:", err);
-        });
-    }
-  }, [token, userId]);
+    if (!isServerLive) return;
+    const fetchToken = async () => {
+      try {
+        const token = await requestFcmToken();
+        if (token) setFcmToken(token);
+      } catch (error) {
+        console.error("FCM Token Error:", error);
+      }
+    };
+    fetchToken();
+  }, [isServerLive]);
 
-  onMessageListener()
-    .then((payload) => {
-      toast(
-        <div>
-          <strong> {payload.notification.title}</strong>
-          <strong> {payload.notification.body}</strong>
-        </div>
-      );
-      console.log("Message received. ", payload);
-    })
-    .catch((err) => {
-      console.log("Error occured", err);
-    });
-    useEffect(() => {
-      checkTokenExpiry(); // Auto-check token expiry on page load
-    }, []);
+  // 3. Save Token to Backend
+  useEffect(() => {
+    const localdata = localStorage.getItem("user_id");
+    const userId = localdata ? JSON.parse(localdata) : null;
+
+    if (fcmToken && userId && isServerLive) {
+      axios
+        .post(`${server}/save-fcm-token`, { token: fcmToken, userId })
+        .catch((err) => console.log("Error Saving Token:", err));
+    }
+  }, [fcmToken, isServerLive]);
+
+  // 4. Token Expiry & Notification Listeners
+  useEffect(() => {
     const checkTokenExpiry = () => {
       const token = localStorage.getItem("token");
-      if (!token) return false; // No token found
-    
+      if (!token) return;
       try {
         const decoded = jwtDecode(token);
         if (decoded.exp * 1000 < Date.now()) {
-          console.log("Token expired, logging out...");
-   
-          return false;
+          localStorage.removeItem("token");
+          window.location.href = "/login";
         }
-        return true;
       } catch (error) {
         console.error("Invalid token:", error);
-        logoutUser(); // If decoding fails, log out
-        return false;
       }
     };
-    
-    const logoutUser = () => {
-      localStorage.removeItem("token"); // Remove token from storage
-      window.location.href = "/login"; // Redirect to login page
-    };
+
+    checkTokenExpiry();
+
+    onMessageListener()
+      .then((payload) => {
+        toast.info(
+          <div>
+            <p className="font-bold">{payload.notification.title}</p>
+            <p className="text-sm">{payload.notification.body}</p>
+          </div>
+        );
+      })
+      .catch((err) => console.log("Message Error:", err));
+  }, []);
+
+  // --- WAKING UP UI ---
+  if (checkingServer) {
+    return (
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-white p-6 text-center">
+        <motion.div 
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+          className="w-16 h-16 border-4 border-slate-100 border-t-blue-600 rounded-full mb-6"
+        />
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">Waking up the Server</h2>
+        <p className="text-slate-500 max-w-xs mx-auto text-sm leading-relaxed">
+          We use free hosting to keep this service live. It might take about 30 seconds to start up. Thank you for your patience!
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <AuthContextProvider>
-        <CategoryContextProvider>
-          <SignupvalContextProvider>
-            <ProductsContextProvider>
-              <BrowserRouter>
-                <Routes>
+    <AuthContextProvider>
+      <CategoryContextProvider>
+        <SignupvalContextProvider>
+          <ProductsContextProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Navbar />}>
+                  <Route index element={
+                    <Suspense fallback={<Loading />}>
+                      <Home />
+                    </Suspense>
+                  } />
                   <Route path="/login" element={<LoginRe />} />
                   <Route path="/signup" element={<SignUp />} />
-                  {/* Public Routes */}
-                  <Route path="/" element={<Navbar />}>
-                    <Route index element={<Home />} />
+                  <Route path="products" element={
+                    <Suspense fallback={<Loading />}>
+                      <Products />
+                    </Suspense>
+                  } />
+                  <Route path="viewproduct/:id" element={<ViewProduct />} />
+                  <Route path="cart" element={<Cart />} />
+                  <Route path="profile" element={<Profile />} />
+                  <Route path="editpage" element={<ProfileEdit />} />
+                </Route>
 
-                    <Route
-                      path="/products"
-                      element={
-                        <Suspense fallback={<Loading />}>
-                          <Products />
-                        </Suspense>
-                      }
-                    />
-                    <Route path="/viewproduct/:id" element={<ViewProduct />} />
-                  </Route>
+                <Route path="/checkout" element={<CheckoutPage />} />
 
-                  {/* Protected Routes */}
-                  <Route
-                    path="/admin/*"
-                    element={
-                      <ProtectedRoute allowedTypes={["admin"]}>
-                        <Suspense fallback={"loading..."}>
-                          <Admin />
-                        </Suspense>
-                      </ProtectedRoute>
-                    }
-                  >
-                    <Route path="users" element={<AllUsers />} />
-                    <Route path="category" element={<Category />} />
-                  </Route>
+                <Route
+                  path="/admin/*"
+                  element={
+                    <ProtectedRoute allowedTypes={["admin"]}>
+                      <Suspense fallback={<Loading />}>
+                        <Admin />
+                      </Suspense>
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route path="users" element={<AllUsers />} />
+                  <Route path="category" element={<Category />} />
+                </Route>
+              </Routes>
 
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/editpage" element={<ProfileEdit />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<CheckoutPage />} />
-                </Routes>
-              </BrowserRouter>
               <ToastContainer
-                position="top-left"
-                autoClose={1000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
+                position="bottom-right"
+                autoClose={2500}
                 transition={Zoom}
+                theme="colored"
               />
-            </ProductsContextProvider>
-          </SignupvalContextProvider>
-        </CategoryContextProvider>
-      </AuthContextProvider>
-    </div>
+            </BrowserRouter>
+          </ProductsContextProvider>
+        </SignupvalContextProvider>
+      </CategoryContextProvider>
+    </AuthContextProvider>
   );
 };
 

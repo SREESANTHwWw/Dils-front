@@ -1,136 +1,99 @@
 import React from "react";
+import { FaFacebookF, FaTwitter, FaLinkedinIn, FaYoutube } from "react-icons/fa";
+import { motion } from "framer-motion";
+
+const FooterLink = ({ children, href = "#" }) => (
+  <a 
+    href={href} 
+    className="text-slate-400 hover:text-white hover:translate-x-1 transition-all duration-300 text-sm"
+  >
+    {children}
+  </a>
+);
 
 const Footer = () => {
   return (
-    <div className="flex flex-col items-center justify-start w-full min-h-[400px] bg-blue-950 py-10 gap-8">
-      <div className="w-[80%] flex justify-center mb-4">
-        <span className="font-bold text-4xl text-white sm:underline">
-          Dils Trades
-        </span>
-      </div>
-
-      <div className="grid sm:grid-cols-4 gap-8 w-[85%]">
-        <div className="flex flex-col items-center gap-5">
-          <span className="text-white text-xl hover:text-yellow-500 cursor-pointer transition-all tracking-widest font-medium">
-            Service
+    <footer className="w-full bg-slate-950 pt-20 pb-10 flex flex-col items-center">
+      <div className="w-[90%] max-w-7xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+        
+        {/* Brand Section */}
+        <div className="flex flex-col gap-6">
+          <span className="font-black text-3xl text-white tracking-tighter italic">
+            DILS<span className="text-indigo-500">TRADES</span>
           </span>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Check your Order Status
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Order Cancellation
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Return Policy
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Shipping & Delivery
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Help & FAQs
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Privacy & Security Center
-          </a>
+          <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
+            Your premier destination for high-quality trades and industrial supplies. Building the future, one order at a time.
+          </p>
+          <div className="flex gap-4">
+            {[FaFacebookF, FaTwitter, FaLinkedinIn, FaYoutube].map((Icon, i) => (
+              <a 
+                key={i} 
+                href="#" 
+                className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-slate-400 hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-lg"
+              >
+                <Icon size={18} />
+              </a>
+            ))}
+          </div>
         </div>
 
-        <div className="flex flex-col items-center gap-5">
-          <span className="text-white text-xl hover:text-yellow-500 cursor-pointer transition-all tracking-widest font-medium">
-            Resources
-          </span>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Specials & Offers
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Truck & Tool Rental
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Moving Supplies & Rentals
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Gift Cards
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Catalog
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Subscriptions
-          </a>
+        {/* Services */}
+        <div className="flex flex-col gap-6">
+          <h4 className="text-white font-bold uppercase tracking-widest text-xs">Customer Service</h4>
+          <nav className="flex flex-col gap-3">
+            <FooterLink>Order Status</FooterLink>
+            <FooterLink>Return Policy</FooterLink>
+            <FooterLink>Shipping & Delivery</FooterLink>
+            <FooterLink>Help & FAQs</FooterLink>
+            <FooterLink>Security Center</FooterLink>
+          </nav>
         </div>
 
-        <div className="flex flex-col items-center gap-5">
-          <span className="text-white text-xl hover:text-yellow-500 cursor-pointer transition-all tracking-widest font-medium">
-            About Us
-          </span>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Careers
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Investor Relations
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Suppliers & Providers
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Affiliate Program
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Corporate Responsibility
-          </a>
-          <a href="#" className="underline text-yellow-500 sm:text-sm">
-            Privacy & Security Center
-          </a>
+        {/* Resources */}
+        <div className="flex flex-col gap-6">
+          <h4 className="text-white font-bold uppercase tracking-widest text-xs">Quick Resources</h4>
+          <nav className="flex flex-col gap-3">
+            <FooterLink>Specials & Offers</FooterLink>
+            <FooterLink>Truck & Tool Rental</FooterLink>
+            <FooterLink>Moving Supplies</FooterLink>
+            <FooterLink>Gift Cards</FooterLink>
+            <FooterLink>Catalog Subscriptions</FooterLink>
+          </nav>
         </div>
 
-        <div className="flex flex-col items-center gap-5   p-4 rounded-lg">
-          <span className="text-white text-lg">Stay Updated</span>
-          <div className="flex flex-col sm:flex-row  gap-3 w-full">
+        {/* Newsletter Section */}
+        <div className="flex flex-col gap-6">
+          <h4 className="text-white font-bold uppercase tracking-widest text-xs">Stay Updated</h4>
+          <p className="text-slate-500 text-sm">Join our newsletter for the latest deals and updates.</p>
+          <div className="flex flex-col gap-3">
             <input
               type="email"
               placeholder="Your Email Address"
-              className="sm:w-[130px] h-[40px] rounded-md outline-none px-1 placeholder:text-sm"
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-indigo-500 transition-colors"
             />
-            <button className="bg-yellow-500  h-[40px] rounded-md px-1 text-white">
-              Subscribe
-            </button>
-          </div>
-
-          <div className="flex gap-5">
-            <a href="#">
-              <img
-                className="w-6 h-5"
-                src="../../public/facebook.png"
-                alt="Facebook"
-              />
-            </a>
-            <a href="#">
-              <img
-                className="w-6 h-5"
-                src="../../public/twitter.png"
-                alt="Twitter"
-              />
-            </a>
-            <a href="#">
-              <img className="w-6 h-5" src="../../link.png" alt="LinkedIn" />
-            </a>
-            <a href="#">
-              <img
-                className="w-6 h-5"
-                src="../../public/yt.png"
-                alt="YouTube"
-              />
-            </a>
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-indigo-500/20"
+            >
+              Subscribe Now
+            </motion.button>
           </div>
         </div>
       </div>
 
-      <div className="w-[80%] bg-slate-300 h-[1px]"></div>
-
-      <div className="w-[78%] flex justify-between items-center text-white">
-        <span>© 2024 All Rights Reserved</span>
-        <span>Made by Dils Trades</span>
+      {/* Bottom Bar */}
+      <div className="w-[90%] max-w-7xl border-t border-slate-900 pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="flex gap-8 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+          <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+          <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+          <a href="#" className="hover:text-white transition-colors">Cookies</a>
+        </div>
+        <div className="text-slate-600 text-xs font-medium">
+          © 2026 <span className="text-slate-400">Dils Trades</span>. Designed with precision.
+        </div>
       </div>
-    </div>
+    </footer>
   );
 };
 

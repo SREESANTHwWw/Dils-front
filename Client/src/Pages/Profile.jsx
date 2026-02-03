@@ -1,169 +1,208 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiLogOut } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiLogOut, FiSettings, FiShoppingBag, FiMapPin, FiUser, FiChevronRight } from "react-icons/fi";
 import { BiMessageSquareEdit } from "react-icons/bi";
-import { AiFillShop, AiOutlineHome, AiOutlineShoppingCart } from "react-icons/ai";
-import { FaRegUser, FaRegAddressBook, FaRegUserCircle } from "react-icons/fa";
-import { PiPhoneCall, PiCity } from "react-icons/pi";
-import { BsWhatsapp, BsCheckCircle } from "react-icons/bs";
-import { IoLocationSharp } from "react-icons/io5";
-import { HiHashtag } from "react-icons/hi";
-import Navbar from "./Navbar"; // Import your Navbar component
+import { AiFillShop } from "react-icons/ai";
+import { FaRegUser, FaWhatsapp, FaHashtag } from "react-icons/fa";
+import { PiPhoneCall } from "react-icons/pi";
 import Userorders from "../Components/Userorders/Userorders";
 import { Useraddress } from "../Components/UserAddress/Useraddress";
 import axios from "axios";
-import { requestFcmToken,  } from '../FirebaseUtils';
+import { requestFcmToken } from '../FirebaseUtils';
+import { server } from "../Server";
+
+
 const Profile = () => {
   const navigate = useNavigate();
-  const localdata = localStorage.getItem("currentUser");
-  const userData = localdata ? JSON.parse(localdata) : [];
-  const localdataStore = localStorage.getItem("user_id");
-const userId = localdataStore ? JSON.parse(localdataStore) : [];
+  const [activeSection, setActiveSection] = useState("My Details");
   const [token, setToken] = useState("");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const userData = JSON.parse(localStorage.getItem("currentUser") || "{}");
+  const userId = JSON.parse(localStorage.getItem("user_id") || "null");
 
   useEffect(() => {
-   const FetchToken = async()=>{
+    const FetchToken = async () => {
+      try {
+        const fcmtoken = await requestFcmToken();
+        if (fcmtoken) setToken(fcmtoken);
+      } catch (error) {
+        console.log("Token Error", error);
+      }
+    };
+    FetchToken();
+  }, []);
+
+  const logout = async () => {
+    const isConfirmed = window.confirm("Are you sure you want to logout?");
+    if (!isConfirmed) return;
+
+    setIsLoggingOut(true);
     try {
-      const fcmtoken = await requestFcmToken()
-      if(fcmtoken){
-        setToken(fcmtoken)
+      // 1. Attempt to remove FCM token from backend
+      if (userId && token) {
+        await axios.delete(`${server}/remove-fcm-token`, { 
+          data: { userId, token } 
+        });
       }
     } catch (error) {
-      console.log( "geting Token Error", error)
-    }
- 
-   }
-   FetchToken()
-  }, []);
-  const editpage = () => navigate("/editpage");
-
-  const logout = () => {
-    localStorage.clear();
-    navigate("/");
-    window.location.reload();
-    axios.delete(`${server}/remove-fcm-token`,{
-      userId,
-      token
+      console.error("Logout API error:", error);
+      // We continue with local logout even if API fails so user isn't stuck
+    } finally {
+      // 2. Clear local data
+      localStorage.clear();
       
-    }).then((res)=>{console.log("deleted") ,res }    )
-
+      // 3. Redirect and Refresh
+      navigate("/");
+      window.location.reload();
+    }
   };
 
-  
+  const menuItems = [
+    { id: "My Details", label: "Profile Info", icon: <FiUser /> },
+    { id: "My Address Book", label: "Address Book", icon: <FiMapPin /> },
+    { id: "My Orders", label: "Order History", icon: <FiShoppingBag /> },
+    { id: "Account Settings", label: "Settings", icon: <FiSettings /> },
+  ];
 
-  const [activeSection, setActiveSection] = useState("My Details");
-
-  const signupvalues = [
-    { icon: <AiFillShop />, placeholder: "Shop Name", value: userData?.shopname || "" },
-    { icon: <FaRegUser />, placeholder: "Owner Name", value: userData?.owner || "" },
-    { icon: <PiPhoneCall />, placeholder: "Phone Number", value: userData?.phonenumber || "" },
-    { icon: <BsWhatsapp />, placeholder: "WhatsApp", value: userData?.whatsappno || "" },
-    { icon: <FaRegAddressBook />, placeholder: "Address", value: userData?.address || "" },
-    { icon: <PiCity />, placeholder: "City", value: userData?.city || "" },
-    { icon: <IoLocationSharp />, placeholder: "Pincode", value: userData?.pincode || "" },
-    { icon: <HiHashtag />, placeholder: "GST No. (Optional)", value: userData?.gstno || "" },
+  const detailCards = [
+    { icon: <AiFillShop />, label: "Shop Name", value: userData?.shopname },
+    { icon: <FaRegUser />, label: "Owner", value: userData?.owner },
+    { icon: <PiPhoneCall />, label: "Contact", value: userData?.phonenumber },
+    { icon: <FaWhatsapp />, label: "WhatsApp", value: userData?.whatsappno, color: "text-emerald-500" },
+    { icon: <FiMapPin />, label: "Location", value: userData?.city ? `${userData.city}, ${userData.pincode}` : "Not Set" },
+    { icon: <FaHashtag />, label: "GST Number", value: userData?.gstno || "Not Provided" },
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      {/* Navbar */}
-      <Navbar />
+    <div className="min-h-screen bg-slate-50 pb-24 lg:pb-0">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* --- SIDEBAR --- */}
+          <aside className="hidden lg:flex flex-col w-72 shrink-0 gap-2">
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-4 text-center">
+              <div className="w-20 h-20 bg-indigo-600 rounded-full mx-auto flex items-center justify-center text-white text-3xl font-black mb-4 shadow-lg shadow-indigo-200">
+                {userData?.shopname?.charAt(0) || "S"}
+              </div>
+              <h3 className="font-bold text-slate-800 truncate">{userData?.shopname}</h3>
+              <p className="text-xs text-slate-400 font-medium">Verified Merchant</p>
+            </div>
 
-      {/* Main Layout */}
-      <div className="flex-grow mt-32">
-        {/* Main Content */}
-        <div className="w-full bg-white p-8 rounded-lg ">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-blue-950">{activeSection}</h2>
-            <button
-              onClick={logout}
-              className={` ${userData.length < 1 ? "hidden" : ""} flex items-center text-sm text-red-600 hover:text-red-700 transition-all duration-300`}
-            >
-              <FiLogOut className="mr-2 text-lg" />
-              Logout
-            </button>
-          </div>
-
-          {/* Dynamic Content */}
-          {activeSection === "My Details" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {signupvalues.map((item, index) => (
-                <div key={index} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg ">
-                  <span className="text-yellow-600 text-2xl">{item.icon}</span>
-                  <div>
-                    <h4 className="text-sm text-gray-500">{item.placeholder}</h4>
-                    <p className="text-lg text-blue-950 font-medium">{item.value || "N/A"}</p>
+            <div className="bg-white rounded-3xl p-3 shadow-sm border border-slate-100 flex flex-col gap-1">
+              {menuItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveSection(item.id)}
+                  className={`flex items-center justify-between px-4 py-3 rounded-2xl transition-all font-semibold text-sm ${
+                    activeSection === item.id 
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-100" 
+                    : "text-slate-500 hover:bg-slate-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg">{item.icon}</span>
+                    {item.label}
                   </div>
-                </div>
+                  <FiChevronRight className={activeSection === item.id ? "opacity-100" : "opacity-0"} />
+                </button>
               ))}
-            </div>
-          )}
-
-          {activeSection === "My Address Book" && (
-            <div>
-              <Useraddress />
-            </div>
-          )}
-          {activeSection === "My Orders" && (
-            <div>
-              <Userorders />
-            </div>
-          )}
-
-          {activeSection === "Account Settings" && (
-            <div>
-              <button
-                onClick={editpage}
-                className="flex items-center gap-2 px-6 py-2 bg-blue-950 text-white rounded-full shadow-md hover:bg-blue-700 transition-all duration-300"
+              <hr className="my-2 border-slate-100" />
+              <button 
+                onClick={logout}
+                disabled={isLoggingOut}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl text-rose-500 font-semibold text-sm hover:bg-rose-50 transition-all disabled:opacity-50"
               >
-                Edit Profile
-                <BiMessageSquareEdit className="text-lg" />
+                <FiLogOut className="text-lg" /> {isLoggingOut ? "Logging out..." : "Logout"}
               </button>
             </div>
-          )}
+          </aside>
+
+          {/* --- MAIN CONTENT AREA --- */}
+          <main className="flex-1">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeSection}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6 md:p-10 min-h-[500px]"
+              >
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">{activeSection}</h2>
+                  {activeSection === "My Details" && (
+                    <button 
+                      onClick={() => navigate("/editpage")}
+                      className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
+                    >
+                      <BiMessageSquareEdit size={22} />
+                    </button>
+                  )}
+                </div>
+
+                {activeSection === "My Details" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {detailCards.map((card, idx) => (
+                      <div key={idx} className="flex items-center gap-4 p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-colors">
+                        <div className={`text-2xl ${card.color || "text-indigo-600"} opacity-80`}>
+                          {card.icon}
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-0.5">{card.label}</p>
+                          <p className="font-bold text-slate-800">{card.value || "Not Set"}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {activeSection === "My Address Book" && <Useraddress />}
+                {activeSection === "My Orders" && <Userorders />}
+                
+                {activeSection === "Account Settings" && (
+                  <div className="space-y-6">
+                    <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100">
+                      <h4 className="font-bold text-slate-800 mb-2">Profile Security</h4>
+                      <p className="text-sm text-slate-500 mb-4">Update your shop credentials or modify account ownership details.</p>
+                      <button 
+                        onClick={() => navigate("/editpage")}
+                        className="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-indigo-600 transition-all"
+                      >
+                        Modify Profile
+                      </button>
+                    </div>
+                    <button 
+                      onClick={logout}
+                      disabled={isLoggingOut}
+                      className="lg:hidden w-full py-4 bg-rose-50 text-rose-600 rounded-2xl font-bold flex items-center justify-center gap-2"
+                    >
+                      <FiLogOut /> {isLoggingOut ? "Logging out..." : "Logout Account"}
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </main>
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 w-full bg-blue-950 flex justify-around items-center py-3 shadow-md">
-        <button
-          onClick={() => setActiveSection("My Details")}
-          className={`flex flex-col items-center ${
-            activeSection === "My Details" ? "text-yellow-400" : "text-white"
-          } hover:text-yellow-500 transition-all duration-200`}
-        >
-          <FaRegUserCircle className="text-2xl" />
-          <span className="text-sm">Details</span>
-        </button>
-        <button
-          onClick={() => setActiveSection("My Address Book")}
-          className={`flex flex-col items-center ${
-            activeSection === "My Address Book" ? "text-yellow-400" : "text-white"
-          } hover:text-yellow-500 transition-all duration-200`}
-        >
-          <FaRegAddressBook className="text-2xl" />
-          <span className="text-sm">Address</span>
-        </button>
-        <button
-          onClick={() => setActiveSection("My Orders")}
-          className={`flex flex-col items-center ${
-            activeSection === "My Orders" ? "text-yellow-400" : "text-white"
-          } hover:text-yellow-500 transition-all duration-200`}
-        >
-          <AiOutlineShoppingCart className="text-2xl" />
-          <span className="text-sm">Orders</span>
-        </button>
-        <button
-          onClick={() => setActiveSection("Account Settings")}
-          className={`flex flex-col items-center ${
-            activeSection === "Account Settings" ? "text-yellow-400" : "text-white"
-          } hover:text-yellow-500 transition-all duration-200`}
-        >
-          <FiLogOut className="text-2xl" />
-          <span className="text-sm">Settings</span>
-        </button>
-      </div>
+      {/* --- MOBILE NAV --- */}
+      <nav className="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-100 flex justify-around items-center py-3 z-50">
+        {menuItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => setActiveSection(item.id)}
+            className={`flex flex-col items-center gap-1 transition-all ${
+              activeSection === item.id ? "text-indigo-600 scale-110" : "text-slate-400"
+            }`}
+          >
+            <span className="text-xl">{item.icon}</span>
+            <span className="text-[10px] font-bold uppercase">{item.id.split(' ')[1] || "Info"}</span>
+          </button>
+        ))}
+      </nav>
     </div>
   );
 };

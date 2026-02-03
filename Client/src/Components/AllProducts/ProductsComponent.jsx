@@ -1,192 +1,196 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { HiOutlineShoppingCart, HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { ProductsContext } from "../Context/ProductsContext";
-import Navbar from "../../Pages/Navbar";
-
 import { AuthContext } from "../Context/AuthContext";
+import Navbar from "../../Pages/Navbar";
 import axios from "axios";
 import { server } from "../../Server";
+import { toast } from "react-toastify";
 
 const ProductsComponent = () => {
-  const { Addtocartfun, formatPrice,searchData } = useContext(ProductsContext);
+  const { Addtocartfun, formatPrice, searchData } = useContext(ProductsContext);
   const { currentUser } = useContext(AuthContext);
- 
+
   const [filterData, setFilterData] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1); // Track the current page
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [product, setProducts] = useState([]);
-  const perpage = 4;
-  const renderPrice = (product) => {
-    if (!currentUser) return null; // Don't show prices if no user is logged in
+  const [loading, setLoading] = useState(true);
+
+  const perpage = 8; // Increased for a better grid fill
+
+  const renderPrice = (item) => {
+    if (!currentUser) return (
+      <p className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg">
+        Login to see price
+      </p>
+    );
 
     const priceTypes = {
-      User: product.price,
-      Medium: product.medium_price,
-      Premium: product.premium_price,
+      User: item.price,
+      Medium: item.medium_price,
+      Premium: item.premium_price,
     };
-    
-    const mrp = product.mRP 
-   
 
-    const userType = currentUser.type;
-    const price = priceTypes[userType];
-    const percentage = ((mrp -price )/mrp)*100
-    const convert = percentage.toFixed()
-
-
+    const userPrice = priceTypes[currentUser.type] || item.price;
+    const discount = (((item.mRP - userPrice) / item.mRP) * 100).toFixed(0);
 
     return (
-      <div className="flex justify-between items-center space-x-4">
-      {/* MRP with Line-Through */}
-      <p className="sm:text-xl text-sm font-medium  text-black  ">
-      {formatPrice(price)}
-      </p>
-    
-      {/* Discount Price */}
-      <p className="text-sm font-bold line-through  text-gray-500">
-     
-        {formatPrice(product.mRP)}
-      </p>
-    
-      {/* Discount Percentage */}
-      <p className="sm:text-sm text-[10px] font-semibold text-red-500 bg-red-100 px-2 py-1 sm:rounded-full">
-        {convert}% Off
-      </p>
-    </div>
-    
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <span className="text-lg font-black text-slate-900">{formatPrice(userPrice)}</span>
+          <span className="text-xs text-slate-400 line-through">{formatPrice(item.mRP)}</span>
+        </div>
+        <span className="inline-block bg-emerald-100 text-emerald-700 text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider">
+          {discount}% Savings
+        </span>
+      </div>
     );
   };
 
   const FetchProduct = () => {
-    const offset = (currentPage - 1) * perpage;
-
+    setLoading(true);
     axios
       .get(`${server}/get-all-products?page=${currentPage}`)
       .then((res) => {
-        
         setProducts(res.data.results);
-        setTotalPages(res.data.totalPages); // Set products data
+        setTotalPages(res.data.totalPages);
       })
       .catch((err) => {
         console.error(err);
-        toast.error("Failed to fetch products"); // Show error toast
-      });
+        toast.error("Waking up server... please wait.");
+      })
+      .finally(() => setLoading(false));
   };
+
   useEffect(() => {
     FetchProduct();
-  }, [currentPage, perpage]);
-
-  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+  }, [currentPage]);
 
   useEffect(() => {
     if (!searchData) {
       setFilterData(product);
     } else {
-      const filteredSearchData = product.filter((res) =>
-        res.productname.toLowerCase().includes(searchData)
+      const filtered = product.filter((res) =>
+        res.productname.toLowerCase().includes(searchData.toLowerCase())
       );
-      setFilterData(filteredSearchData);
+      setFilterData(filtered);
     }
   }, [searchData, product]);
 
-  const searchfunction = (e) => {
-    setSearchData(e.target.value.toLowerCase());
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const handlePageClick = (page) => {
-    setCurrentPage(page);
-  };
+  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   return (
-    <div className="w-full flex justify-center items-center flex-col mt-[7rem]">
-      {/* Navbar */}
-      <Navbar />
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center">
+    
 
-      {/* Product Grid */}
-      <div className="sm:w-[85%] grid grid-cols-2  w-[350px] sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 py-10">
-        {filterData.map((product, index) => (
-          <div
-            key={index}
-            className="flex flex-col bg-white border border-gray-200 rounded-lg shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1 duration-300 overflow-hidden"
-          >
-            {/* Product Image */}
-            <Link to={`/viewproduct/${product._id}`}>
-              <img
-                className=" w-35 h-35 sm:w-full sm:h-56 object-cover"
-                src={product.product_img}
-                alt={product.productname}
-              />
-            </Link>
-
-            {/* Product Content */}
-            <div className="p-4 flex flex-col flex-1 justify-between">
-              <Link to={`/viewproduct/${product._id}`}>
-                <div>
-                  {/* Product Name */}
-                  <h3 className="sm:text-lg text-sm font-bold text-gray-800 mb-2 truncate">
-                    {product.productname}
-                  </h3>
-
-                  {/* Product Description */}
-                  <p className="sm:text-sm text-[10px] text-gray-600 mb-3 line-clamp-2">
-                    {product.description}
-                  </p>
-
-                  {/* Price Section */}
-                  {renderPrice(product)}
-                </div>
-              </Link>
-
-              {/* Add to Cart Button */}
-              <button
-                onClick={() => Addtocartfun(product)}
-                className="mt-4 w-full py-2 bg-blue-950 text-white font-semibold rounded-md hover:bg-yellow-600 transition duration-300"
-              >
-                Add to Cart
-              </button>
-            </div>
+      <main className="w-full max-w-7xl px-4 mt-4">
+        {/* Header Section */}
+        <header className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Our Collection</h1>
+            <p className="text-slate-500 font-medium mt-1">Discover premium trades at unbeatable rates.</p>
           </div>
-        ))}
-      </div>
-      <div className="flex mt-6 space-x-2">
-        <button
-          onClick={handlePrev}
-          disabled={currentPage === 1}
-          className="px-4 py-2 border rounded-md hover:bg-gray-200 disabled:opacity-50"
-        >
-          Previous
-        </button>
-        {pageNumbers.map((page) => (
-          <button
-            key={page}
-            onClick={() => handlePageClick(page)}
-            className={`px-4 py-2 border rounded-md hover:bg-gray-200 ${
-              currentPage === page ? "bg-blue-900 text-white" : "bg-white"
-            }`}
-          >
-            {page}
-          </button>
-        ))}
-        <button
-          onClick={handleNext}
-          disabled={currentPage === totalPages}
-          className="px-4 py-2 border rounded-md hover:bg-gray-200 disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
+          <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            Showing {filterData.length} Products
+          </div>
+        </header>
+
+        {/* Product Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+          <AnimatePresence mode="popLayout">
+            {loading ? (
+              // Skeleton Loader
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-80 bg-white rounded-[2rem] animate-pulse border border-slate-100" />
+              ))
+            ) : (
+              filterData.map((item, index) => (
+                <motion.div
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  key={item._id}
+                  className="group bg-white rounded-[2rem] border border-slate-100 overflow-hidden hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)] transition-all duration-500"
+                >
+                  <Link to={`/viewproduct/${item._id}`} className="relative block aspect-square overflow-hidden bg-slate-100">
+                    <img
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      src={item.product_img}
+                      alt={item.productname}
+                    />
+                    <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors" />
+                  </Link>
+
+                  <div className="p-5">
+                    <Link to={`/viewproduct/${item._id}`}>
+                      <h3 className="font-bold text-slate-800 mb-1 truncate group-hover:text-blue-600 transition-colors">
+                        {item.productname}
+                      </h3>
+                      <p className="text-xs text-slate-500 line-clamp-2 mb-4 min-h-[2rem]">
+                        {item.description}
+                      </p>
+                      <div className="mb-4">
+                        {renderPrice(item)}
+                      </div>
+                    </Link>
+
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => Addtocartfun(item)}
+                      className="w-full py-3 bg-blue-950 text-white text-xs font-black uppercase tracking-widest rounded-xl hover:bg-yellow-500 hover:text-blue-950 transition-all duration-300 flex items-center justify-center gap-2"
+                    >
+                      <HiOutlineShoppingCart size={16} />
+                      Add to Cart
+                    </motion.button>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Modern Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center mt-16 gap-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="p-3 bg-white border border-slate-100 rounded-xl hover:bg-blue-50 disabled:opacity-30 transition-all shadow-sm"
+            >
+              <HiChevronLeft size={20} />
+            </button>
+            
+            <div className="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm">
+              {pageNumbers.map((page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-10 h-10 rounded-xl text-sm font-bold transition-all ${
+                    currentPage === page 
+                      ? "bg-blue-950 text-white shadow-lg shadow-blue-900/20" 
+                      : "text-slate-400 hover:bg-slate-50"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="p-3 bg-white border border-slate-100 rounded-xl hover:bg-blue-50 disabled:opacity-30 transition-all shadow-sm"
+            >
+              <HiChevronRight size={20} />
+            </button>
+          </div>
+        )}
+      </main>
     </div>
   );
 };
